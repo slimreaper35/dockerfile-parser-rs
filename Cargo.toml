@@ -1,0 +1,12 @@
+[package]
+name = "dockerfile-parser"
+version = "0.1.0"
+edition = "2024"
+authors = ["Michal Šoltis <msoltis1@icloud.com>"]
+readme = "README.md"
+license = "MIT"
+description = "A simple Dockerfile parser in Rust"
+
+[dependencies]
+regex = "1.11.1"
+thiserror = "2.0.12"
