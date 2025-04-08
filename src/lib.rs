@@ -4,8 +4,11 @@ mod parser;
 mod symbols;
 mod utils;
 
-use std::path::Path;
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
 
+// public API
 pub use crate::ast::Instruction;
 pub use crate::error::ParseError;
 
@@ -22,79 +25,96 @@ use crate::parser::instructions::run;
 use crate::parser::instructions::user;
 use crate::parser::instructions::volume;
 use crate::parser::instructions::workdir;
+use crate::symbols::chars::HASHTAG;
 use crate::utils::read_lines;
 
-use regex::Regex;
+fn tokenize_line(line: &str) -> anyhow::Result<(String, Vec<String>)> {
+    // https://docs.docker.com/reference/dockerfile/#format
+    let regex = regex::Regex::new(r"^(?P<instruction>[A-Z]+)\s*(?P<arguments>.*)").unwrap();
 
-const RE: &str = r"^(?P<instruction>[A-Z]+)\s*(?P<args>.*)";
-
-fn tokenize_line(line: &str) -> Result<(&str, &str), ParseError> {
-    let regex = Regex::new(RE).unwrap();
     let captures = regex
         .captures(line)
-        .ok_or(ParseError::SyntaxError(line.to_string()))?;
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?;
 
     let instruction = captures
         .name("instruction")
-        .ok_or(ParseError::SyntaxError(line.to_string()))?
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
         .as_str();
 
-    let args = captures
-        .name("args")
-        .ok_or(ParseError::SyntaxError(line.to_string()))?
+    let arguments = captures
+        .name("arguments")
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
         .as_str();
 
-    Ok((instruction, args))
+    Ok((
+        instruction.to_string(),
+        arguments
+            .split_whitespace()
+            .map(|s| s.to_string())
+            .collect(),
+    ))
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug)]
 pub struct Dockerfile {
-    pub path: Box<Path>,
+    pub path: PathBuf,
     pub instructions: Vec<Instruction>,
 }
 
 impl Dockerfile {
-    pub fn new(path: Box<Path>) -> Self {
+    pub fn new(path: PathBuf) -> Self {
         Dockerfile {
             path,
             instructions: Vec::new(),
         }
     }
 
-    pub fn parse(&self) -> Result<Vec<Instruction>, ParseError> {
-        let lines = read_lines(self.path.as_ref());
+    pub fn from(path: PathBuf) -> anyhow::Result<Self> {
+        let mut dockerfile = Dockerfile::new(path);
+        dockerfile.instructions = dockerfile.parse()?;
+        Ok(dockerfile)
+    }
+
+    pub fn parse(&self) -> anyhow::Result<Vec<Instruction>> {
+        let lines = read_lines(&self.path);
         let mut instructions = Vec::new();
 
         for line in lines {
-            let trimmed = line.trim();
-
-            if trimmed.is_empty() {
-                // preserve empty lines
+            // preserve empty lines
+            if line.is_empty() {
                 instructions.push(Instruction::Empty);
-            } else if trimmed.starts_with("#") {
-                // preserve comments
-                instructions.push(Instruction::Comment(trimmed.to_string()));
+            // preserve comments
+            } else if line.starts_with(HASHTAG) {
+                instructions.push(Instruction::Comment(line.to_string()));
             } else {
-                let (keyword, args) = tokenize_line(trimmed)?;
-                let instruction = match keyword {
-                    "ADD" => add::parse(args),
-                    "ARG" => arg::parse(args),
-                    "CMD" => cmd::parse(args),
-                    "COPY" => copy::parse(args),
-                    "ENTRYPOINT" => entrypoint::parse(args),
-                    "ENV" => env::parse(args),
-                    "EXPOSE" => expose::parse(args),
-                    "LABEL" => label::parse(args),
-                    "FROM" => from::parse(args),
-                    "RUN" => run::parse(args),
-                    "USER" => user::parse(args),
-                    "VOLUME" => volume::parse(args),
-                    "WORKDIR" => workdir::parse(args),
-                    _ => return Err(ParseError::UnsupportedInstruction(keyword.to_string())),
+                let (instruction, arguments) = tokenize_line(&line)?;
+                let instruction = match instruction.as_str() {
+                    "ADD" => add::parse(arguments),
+                    "ARG" => arg::parse(arguments),
+                    "CMD" => cmd::parse(arguments),
+                    "COPY" => copy::parse(arguments),
+                    "ENTRYPOINT" => entrypoint::parse(arguments),
+                    "ENV" => env::parse(arguments),
+                    "EXPOSE" => expose::parse(arguments),
+                    "LABEL" => label::parse(arguments),
+                    "FROM" => from::parse(arguments),
+                    "RUN" => run::parse(arguments),
+                    "USER" => user::parse(arguments),
+                    "VOLUME" => volume::parse(arguments),
+                    "WORKDIR" => workdir::parse(arguments),
+                    _ => return Err(ParseError::UnknownInstruction(instruction))?,
                 }?;
                 instructions.push(instruction);
             }
         }
         Ok(instructions)
+    }
+
+    pub fn dump(&self) -> anyhow::Result<()> {
+        let mut file = File::create(&self.path)?;
+        for instruction in &self.instructions {
+            writeln!(file, "{}", instruction)?;
+        }
+        Ok(())
     }
 }

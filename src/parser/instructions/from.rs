@@ -1,28 +1,26 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
-use crate::parser::options::parse_options;
+use crate::parser::options::get_options_from;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let (flags_map, remaining) = parse_options(args);
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let (options, remaining) = get_options_from(arguments);
 
-    let platform = flags_map.get("platform").cloned();
+    let platform = options.get("platform").cloned();
 
-    let mut iter = remaining.split_whitespace();
-    let image = iter
-        .next()
-        .ok_or(ParseError::SyntaxError(args.to_string()))?;
+    let image = remaining
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("Missing argument for FROM instruction"))?;
 
     // check if there is an alias
-    let keyword = iter.next();
-    let alias = iter.next();
+    let keyword = remaining.get(1);
+    let alias = remaining.get(2);
 
     if keyword.is_some() && alias.is_none() {
-        return Err(ParseError::SyntaxError(args.to_string()));
+        anyhow::bail!("Missing alias for FROM instruction");
     }
 
     Ok(Instruction::From {
         platform,
         image: image.to_string(),
-        alias: alias.map(|a| a.to_string()),
+        alias: alias.map(|s| s.to_string()),
     })
 }

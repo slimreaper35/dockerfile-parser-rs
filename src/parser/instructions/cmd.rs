@@ -1,7 +1,28 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
+use crate::parser::utils::is_exec_form;
+use crate::symbols::chars::COMMA;
+use crate::symbols::chars::DOUBLE_QUOTE;
+use crate::symbols::chars::LEFT_BRACKET;
+use crate::symbols::chars::RIGHT_BRACKET;
+use crate::symbols::strings::EMPTY;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let command = args.trim().to_string();
-    Ok(Instruction::Cmd { command })
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let mut command: Vec<String> = Vec::new();
+
+    if is_exec_form(&arguments) {
+        for arg in arguments {
+            let cmd = arg
+                .trim_start_matches(LEFT_BRACKET)
+                .trim_end_matches(RIGHT_BRACKET)
+                .replace([DOUBLE_QUOTE, COMMA], EMPTY);
+
+            if !cmd.is_empty() {
+                command.push(cmd);
+            }
+        }
+    } else {
+        command.extend(arguments);
+    };
+
+    Ok(Instruction::Cmd(command))
 }

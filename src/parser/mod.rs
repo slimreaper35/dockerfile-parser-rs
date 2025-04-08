@@ -1,2 +1,3 @@
 pub mod instructions;
-pub mod options;
+mod options;
+mod utils;

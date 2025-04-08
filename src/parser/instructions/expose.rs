@@ -1,14 +1,19 @@
+use std::str::FromStr;
+
 use crate::ast::Instruction;
-use crate::error::ParseError;
+use crate::ast::Protocol;
+use crate::symbols::chars::SLASH;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let mut iter = args.split_whitespace();
-    let port = iter
-        .next()
-        .ok_or(ParseError::SyntaxError(args.to_string()))?;
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let port = arguments
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("Missing argument for EXPOSE instruction"))?;
 
-    match port.parse() {
-        Ok(port) => Ok(Instruction::Expose { port }),
-        Err(_) => Err(ParseError::SyntaxError(args.to_string())),
-    }
+    // check if there is a protocol
+    let (port, protocol) = match port.split_once(SLASH) {
+        Some((port, protocol)) => (port.to_string(), Some(Protocol::from_str(protocol)?)),
+        None => (port.to_string(), None),
+    };
+
+    Ok(Instruction::Expose { port, protocol })
 }

@@ -1,31 +1,88 @@
-use crate::symbols::chars::EQ;
-use crate::symbols::chars::SPACE;
+use crate::symbols::chars::EQUALS;
 use crate::symbols::strings::HYPHEN_MINUS;
 
 use std::collections::HashMap;
 
-pub fn parse_options(args: &str) -> (HashMap<String, String>, &str) {
+pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec<String>) {
     let mut options = HashMap::new();
-    let mut remaining = args;
+    let mut remaining = Vec::new();
 
-    while let Some(option_start_position) = remaining.find(HYPHEN_MINUS) {
-        // split at the start of the option
-        let after_option = remaining.split_at(option_start_position).1;
-
-        let option_end_position = after_option.find(SPACE).unwrap_or(after_option.len());
-        let new_option = &after_option[..option_end_position];
-        // not a real Docker option
-        if !new_option.contains(EQ) {
-            break;
+    for arg in &arguments {
+        if let Some(stripped) = arg.strip_prefix(HYPHEN_MINUS) {
+            if let Some((key, value)) = stripped.split_once(EQUALS) {
+                options.insert(key.to_string(), value.to_string());
+                continue;
+            }
         }
-
-        if let Some((key, value)) = new_option[HYPHEN_MINUS.len()..].split_once(EQ) {
-            options.insert(key.to_string(), value.to_string());
-        }
-
-        // go to the next option
-        remaining = after_option[option_end_position..].trim_start();
+        break;
     }
 
-    (options, remaining.trim())
+    remaining.extend(arguments.iter().skip(options.len()).cloned());
+
+    (options, remaining)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::parser::options::get_options_from;
+
+    #[test]
+    fn test_parse_options() {
+        let arguments = Vec::from([
+            String::from("--option1=value1"),
+            String::from("--option2=value2"),
+            String::from("arg1"),
+            String::from("arg2"),
+        ]);
+        let (options, remaining) = get_options_from(arguments);
+        assert_eq!(
+            options.get("option1"),
+            Some(String::from("value1")).as_ref()
+        );
+        assert_eq!(
+            options.get("option2"),
+            Some(String::from("value2")).as_ref()
+        );
+        assert_eq!(remaining, vec!["arg1", "arg2"]);
+    }
+
+    #[test]
+    fn test_parse_options_no_arguments() {
+        let arguments = Vec::from([
+            String::from("--option1=value1"),
+            String::from("--option2=value2"),
+        ]);
+        let (options, remaining) = get_options_from(arguments);
+        assert_eq!(
+            options.get("option1"),
+            Some(String::from("value1")).as_ref()
+        );
+        assert_eq!(
+            options.get("option2"),
+            Some(String::from("value2")).as_ref()
+        );
+        assert!(remaining.is_empty());
+    }
+
+    #[test]
+    fn test_parse_options_no_options() {
+        let arguments = Vec::from([String::from("arg1"), String::from("arg2")]);
+        let (options, remaining) = get_options_from(arguments);
+        assert!(options.is_empty());
+        assert_eq!(remaining, vec!["arg1", "arg2"]);
+    }
+
+    #[test]
+    fn test_parse_options_no_equals() {
+        let arguments = Vec::from([
+            String::from("--option1"),
+            String::from("--option2"),
+            String::from("arg1"),
+            String::from("arg2"),
+        ]);
+        let (options, remaining) = get_options_from(arguments);
+        assert_eq!(options.get("option1"), None);
+        assert_eq!(options.get("option2"), None);
+        assert_eq!(remaining, vec!["--option1", "--option2", "arg1", "arg2"]);
+    }
 }

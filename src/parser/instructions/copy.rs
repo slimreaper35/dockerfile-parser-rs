@@ -1,27 +1,22 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
-use crate::parser::options::parse_options;
+use crate::parser::options::get_options_from;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let (flags_map, remaining) = parse_options(args);
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let (options_map, remaining) = get_options_from(arguments);
 
-    let from = flags_map.get("from").cloned();
-    let chown = flags_map.get("chown").cloned();
-    let chmod = flags_map.get("chmod").cloned();
-    let link = flags_map.get("link").cloned();
+    let from = options_map.get("from").cloned();
+    let chown = options_map.get("chown").cloned();
+    let chmod = options_map.get("chmod").cloned();
+    let link = options_map.get("link").cloned();
 
-    let mut sources: Vec<String> = remaining
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect();
+    let mut sources: Vec<String> = remaining;
+    if sources.is_empty() {
+        anyhow::bail!("Missing source argument for COPY instruction");
+    }
 
     let destination = sources
         .pop()
-        .ok_or(ParseError::SyntaxError(args.to_string()))?;
-
-    if sources.is_empty() {
-        return Err(ParseError::SyntaxError(args.to_string()));
-    }
+        .ok_or_else(|| anyhow::anyhow!("Missing destination argument for COPY instruction"))?;
 
     Ok(Instruction::Copy {
         from,

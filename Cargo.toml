@@ -1,12 +1,17 @@
 [package]
-name = "dockerfile-parser"
+name = "dockerfile-parser-rs"
 version = "0.1.0"
-edition = "2024"
 authors = ["Michal Šoltis <msoltis1@icloud.com>"]
-readme = "README.md"
+edition = "2024"
+description = "A pure Rust library for parsing, modifying, and generating Dockerfiles"
 license = "MIT"
-description = "A simple Dockerfile parser in Rust"
+repository = "https://github.com/slimreaper35/dockerfile-parser-rs"
+readme = "README.md"
+keywords = ["library", "parser", "docker", "dockerfile", "containers"]
 
 [dependencies]
+anyhow = "1.0.97"
 regex = "1.11.1"
+strum = "0.27.1"
+strum_macros = "0.27.1"
 thiserror = "2.0.12"

@@ -1,15 +1,17 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
+use crate::symbols::chars::DOUBLE_QUOTE;
+use crate::symbols::chars::EQUALS;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let mut iter = args.split_whitespace();
-    let arg = iter
-        .next()
-        .ok_or(ParseError::SyntaxError(args.to_string()))?;
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let name = arguments
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("Missing argument for ARG instruction"))?;
 
-    if arg.contains('=') && arg.split('=').count() == 2 {
-        let (key, value) = arg.split_once('=').unwrap();
-        let value = value.trim_start_matches('"').trim_end_matches('"');
+    if name.contains(EQUALS) && name.split(EQUALS).count() == 2 {
+        let (key, value) = name.split_once(EQUALS).unwrap();
+        let value = value
+            .trim_start_matches(DOUBLE_QUOTE)
+            .trim_end_matches(DOUBLE_QUOTE);
 
         Ok(Instruction::Arg {
             name: key.to_string(),
@@ -17,7 +19,7 @@ pub fn parse(args: &str) -> Result<Instruction, ParseError> {
         })
     } else {
         Ok(Instruction::Arg {
-            name: arg.to_string(),
+            name: name.to_string(),
             default: None,
         })
     }

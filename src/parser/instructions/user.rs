@@ -1,18 +1,16 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
+use crate::symbols::chars::COLON;
 
-const COLON: char = ':';
-
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let mut iter = args.split_whitespace();
-    let user_with_group = iter
-        .next()
-        .ok_or_else(|| ParseError::SyntaxError(args.to_string()))?;
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let user = arguments
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("Missing argument for USER instruction"))?;
 
     // check if there is a group
-    let mut parts = user_with_group.splitn(2, COLON);
-    let user = parts.next().unwrap().to_string();
-    let group = parts.next().map(|g| g.to_string());
+    let (user, group) = match user.split_once(COLON) {
+        Some((user, group)) => (user.to_string(), Some(group.to_string())),
+        None => (user.to_string(), None),
+    };
 
     Ok(Instruction::User { user, group })
 }

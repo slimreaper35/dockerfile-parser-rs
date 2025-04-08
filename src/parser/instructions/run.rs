@@ -1,18 +1,14 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
-use crate::parser::options::parse_options;
+use crate::parser::options::get_options_from;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let (flags_map, remaining) = parse_options(args);
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let (options, remaining) = get_options_from(arguments);
 
-    let mount = flags_map.get("mount").cloned();
-    let network = flags_map.get("network").cloned();
-    let security = flags_map.get("security").cloned();
+    let mount = options.get("mount").cloned();
+    let network = options.get("network").cloned();
+    let security = options.get("security").cloned();
 
-    let command = remaining.to_string();
-    if command.is_empty() {
-        return Err(ParseError::SyntaxError(args.to_string()));
-    }
+    let command = remaining;
 
     Ok(Instruction::Run {
         mount,

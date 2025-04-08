@@ -1,15 +1,28 @@
 use crate::ast::Instruction;
-use crate::error::ParseError;
+use crate::parser::utils::is_exec_form;
+use crate::symbols::chars::COMMA;
+use crate::symbols::chars::DOUBLE_QUOTE;
+use crate::symbols::chars::LEFT_BRACKET;
+use crate::symbols::chars::RIGHT_BRACKET;
+use crate::symbols::strings::EMPTY;
 
-pub fn parse(args: &str) -> Result<Instruction, ParseError> {
-    let mut iter = args.split_whitespace();
-    let mount = iter
-        .next()
-        .ok_or(ParseError::SyntaxError(args.to_string()))?;
+pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+    let mut mounts: Vec<String> = Vec::new();
 
-    let mount = mount.trim_start_matches("[\"").trim_end_matches("\"]");
+    if is_exec_form(&arguments) {
+        for arg in arguments {
+            let mount = arg
+                .trim_start_matches(LEFT_BRACKET)
+                .trim_end_matches(RIGHT_BRACKET)
+                .replace([DOUBLE_QUOTE, COMMA], EMPTY);
 
-    Ok(Instruction::Volume {
-        mount: mount.to_string(),
-    })
+            if !mount.is_empty() {
+                mounts.push(mount);
+            }
+        }
+    } else {
+        mounts.extend(arguments);
+    };
+
+    Ok(Instruction::Volume { mounts })
 }
