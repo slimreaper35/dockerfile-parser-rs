@@ -24,16 +24,16 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::options::get_options_from;
+    use super::*;
 
     #[test]
     fn test_parse_options() {
-        let arguments = Vec::from([
+        let arguments = vec![
             String::from("--option1=value1"),
             String::from("--option2=value2"),
             String::from("arg1"),
             String::from("arg2"),
-        ]);
+        ];
         let (options, remaining) = get_options_from(arguments);
         assert_eq!(
             options.get("option1"),
@@ -48,10 +48,10 @@ mod tests {
 
     #[test]
     fn test_parse_options_no_arguments() {
-        let arguments = Vec::from([
+        let arguments = vec![
             String::from("--option1=value1"),
             String::from("--option2=value2"),
-        ]);
+        ];
         let (options, remaining) = get_options_from(arguments);
         assert_eq!(
             options.get("option1"),
@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_parse_options_no_options() {
-        let arguments = Vec::from([String::from("arg1"), String::from("arg2")]);
+        let arguments = vec![String::from("arg1"), String::from("arg2")];
         let (options, remaining) = get_options_from(arguments);
         assert!(options.is_empty());
         assert_eq!(remaining, vec!["arg1", "arg2"]);
@@ -74,12 +74,12 @@ mod tests {
 
     #[test]
     fn test_parse_options_no_equals() {
-        let arguments = Vec::from([
+        let arguments = vec![
             String::from("--option1"),
             String::from("--option2"),
             String::from("arg1"),
             String::from("arg2"),
-        ]);
+        ];
         let (options, remaining) = get_options_from(arguments);
         assert_eq!(options.get("option1"), None);
         assert_eq!(options.get("option2"), None);

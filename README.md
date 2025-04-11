@@ -1,6 +1,6 @@
 # dockerfile-parser-rs
 
-[![Version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
+[![version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
 
 The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 

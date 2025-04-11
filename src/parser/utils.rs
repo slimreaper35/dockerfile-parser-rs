@@ -48,3 +48,67 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
 
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_exec_form_pass() {
+        assert!(is_exec_form(&[String::from("[\"/usr/bin/executable\"]")]));
+        assert!(is_exec_form(&[String::from(
+            "[\"/usr/bin/executable\", \"arg1\"]"
+        )]));
+        assert!(is_exec_form(&[String::from(
+            "[\"/usr/bin/executable\", \"arg1\", \"arg2\"]"
+        )]));
+        assert!(!is_exec_form(&[String::from("/usr/bin/executable")]));
+        assert!(!is_exec_form(&[String::from("/usr/bin/executable arg1")]));
+        assert!(!is_exec_form(&[String::from(
+            "/usr/bin/executable arg1 arg2"
+        )]));
+    }
+
+    #[test]
+    fn test_process_key_value_pairs_without_spaces() {
+        let arguments = vec![
+            String::from("key1=\"value1\""),
+            String::from("key2=\"value2\""),
+        ];
+        let result = process_key_value_pairs(&arguments);
+
+        assert_eq!(result.get("key1"), Some(String::from("value1")).as_ref());
+        assert_eq!(result.get("key2"), Some(String::from("value2")).as_ref());
+    }
+
+    #[test]
+    fn test_process_key_value_pairs_without_spaces_and_quotes() {
+        let arguments = vec![String::from("key1=value1"), String::from("key2=value2")];
+        let result = process_key_value_pairs(&arguments);
+
+        assert_eq!(result.get("key1"), Some(String::from("value1")).as_ref());
+        assert_eq!(result.get("key2"), Some(String::from("value2")).as_ref());
+    }
+
+    #[test]
+    fn test_process_key_value_pairs_with_spaces_and_quotes() {
+        let arguments = vec![
+            String::from("key1=\"value1"),
+            String::from("with"),
+            String::from("spaces\""),
+            String::from("key2=\"value2"),
+            String::from("with"),
+            String::from("spaces\""),
+        ];
+        let result = process_key_value_pairs(&arguments);
+
+        assert_eq!(
+            result.get("key1"),
+            Some(String::from("value1 with spaces")).as_ref()
+        );
+        assert_eq!(
+            result.get("key2"),
+            Some(String::from("value2 with spaces")).as_ref()
+        );
+    }
+}

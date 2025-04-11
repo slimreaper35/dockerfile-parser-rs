@@ -3,6 +3,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::path::PathBuf;
 
+use crate::error::ParseError;
 use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
 use crate::symbols::chars::SPACE;
@@ -36,4 +37,31 @@ pub fn read_lines(path: &PathBuf) -> Vec<String> {
     }
 
     lines
+}
+
+pub fn tokenize_line(line: &str) -> Result<(String, Vec<String>), ParseError> {
+    // https://docs.docker.com/reference/dockerfile/#format
+    let regex = regex::Regex::new(r"^(?P<instruction>[A-Z]+)\s*(?P<arguments>.*)").unwrap();
+
+    let captures = regex
+        .captures(line)
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?;
+
+    let instruction = captures
+        .name("instruction")
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
+        .as_str();
+
+    let arguments = captures
+        .name("arguments")
+        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
+        .as_str();
+
+    Ok((
+        instruction.to_string(),
+        arguments
+            .split_whitespace()
+            .map(|s| s.to_string())
+            .collect(),
+    ))
 }

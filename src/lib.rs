@@ -27,33 +27,7 @@ use crate::parser::instructions::volume;
 use crate::parser::instructions::workdir;
 use crate::symbols::chars::HASHTAG;
 use crate::utils::read_lines;
-
-fn tokenize_line(line: &str) -> anyhow::Result<(String, Vec<String>)> {
-    // https://docs.docker.com/reference/dockerfile/#format
-    let regex = regex::Regex::new(r"^(?P<instruction>[A-Z]+)\s*(?P<arguments>.*)").unwrap();
-
-    let captures = regex
-        .captures(line)
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?;
-
-    let instruction = captures
-        .name("instruction")
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
-        .as_str();
-
-    let arguments = captures
-        .name("arguments")
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
-        .as_str();
-
-    Ok((
-        instruction.to_string(),
-        arguments
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect(),
-    ))
-}
+use crate::utils::tokenize_line;
 
 #[derive(Debug)]
 pub struct Dockerfile {
@@ -75,7 +49,7 @@ impl Dockerfile {
         Ok(dockerfile)
     }
 
-    pub fn parse(&self) -> anyhow::Result<Vec<Instruction>> {
+    pub fn parse(&self) -> Result<Vec<Instruction>, ParseError> {
         let lines = read_lines(&self.path);
         let mut instructions = Vec::new();
 
@@ -102,8 +76,9 @@ impl Dockerfile {
                     "USER" => user::parse(arguments),
                     "VOLUME" => volume::parse(arguments),
                     "WORKDIR" => workdir::parse(arguments),
-                    _ => return Err(ParseError::UnknownInstruction(instruction))?,
-                }?;
+                    _ => return Err(ParseError::UnknownInstruction(instruction)),
+                }
+                .map_err(|e| ParseError::SyntaxError(e.to_string()))?;
                 instructions.push(instruction);
             }
         }
