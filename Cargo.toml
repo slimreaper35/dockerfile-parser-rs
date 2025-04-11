@@ -3,11 +3,11 @@ name = "dockerfile-parser-rs"
 version = "0.1.0"
 authors = ["Michal Šoltis <msoltis1@icloud.com>"]
 edition = "2024"
-description = "A pure Rust library for parsing, modifying, and generating Dockerfiles"
+description = "The ultimate Rust library for parsing, modifying, and generating Dockerfiles"
 license = "MIT"
 repository = "https://github.com/slimreaper35/dockerfile-parser-rs"
 readme = "README.md"
-keywords = ["library", "parser", "docker", "dockerfile", "containers"]
+keywords = ["containers", "docker", "dockerfile", "library", "parser"]
 
 [dependencies]
 anyhow = "1.0.97"

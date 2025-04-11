@@ -1,6 +1,8 @@
 # dockerfile-parser-rs
 
-A pure Rust library for parsing, modifying, and generating Dockerfiles.
+[![Version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
+
+The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 
 ## Instructions
 
@@ -22,7 +24,9 @@ A pure Rust library for parsing, modifying, and generating Dockerfiles.
 [Dockerfile instructions](https://docs.docker.com/reference/dockerfile/#overview),
 this library also supports placeholders for empty lines and comments.
 
-## Installation
+## Install
+
+Run the following Cargo command in your project directory:
 
 ```bash
 cargo add dockerfile-parser-rs
