@@ -7,14 +7,10 @@ use crate::symbols::chars::RIGHT_BRACKET;
 use crate::symbols::strings::HYPHEN_MINUS;
 
 pub fn is_exec_form(arguments: &[String]) -> bool {
-    arguments
-        .first()
-        .map(|s| s.starts_with(LEFT_BRACKET))
-        .unwrap_or(false)
-        && arguments
-            .last()
-            .map(|s| s.ends_with(RIGHT_BRACKET))
-            .unwrap_or(false)
+    matches!(
+        (arguments.first(), arguments.last()),
+        (Some(first), Some(last)) if first.starts_with(LEFT_BRACKET) && last.ends_with(RIGHT_BRACKET)
+    )
 }
 
 pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec<String>) {

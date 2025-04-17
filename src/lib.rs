@@ -51,7 +51,9 @@ impl Dockerfile {
     }
 
     pub fn parse(&self) -> ParseResult<Vec<Instruction>> {
-        let lines = read_lines(&self.path);
+        let file = File::open(&self.path).map_err(|e| ParseError::FileError(e.to_string()))?;
+        let lines = read_lines(&file);
+
         let mut instructions = Vec::new();
 
         for line in lines {

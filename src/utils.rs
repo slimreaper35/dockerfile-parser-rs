@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use std::path::PathBuf;
 
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -11,8 +10,7 @@ use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
 use crate::symbols::chars::SPACE;
 
-pub fn read_lines(path: &PathBuf) -> Vec<String> {
-    let file = File::open(path).unwrap_or_else(|e| panic!("Error opening file: {}", e));
+pub fn read_lines(file: &File) -> Vec<String> {
     let reader = BufReader::new(file);
 
     let mut lines = Vec::new();
