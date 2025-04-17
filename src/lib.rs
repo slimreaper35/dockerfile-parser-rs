@@ -8,10 +8,6 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-// public API
-pub use crate::ast::Instruction;
-pub use crate::error::ParseError;
-
 use crate::parser::instructions::add;
 use crate::parser::instructions::arg;
 use crate::parser::instructions::cmd;
@@ -27,7 +23,12 @@ use crate::parser::instructions::volume;
 use crate::parser::instructions::workdir;
 use crate::symbols::chars::HASHTAG;
 use crate::utils::read_lines;
-use crate::utils::tokenize_line;
+use crate::utils::split_instruction_and_arguments;
+
+pub use crate::ast::Instruction;
+pub use crate::error::ParseError;
+
+pub type ParseResult<T> = Result<T, ParseError>;
 
 #[derive(Debug)]
 pub struct Dockerfile {
@@ -43,13 +44,13 @@ impl Dockerfile {
         }
     }
 
-    pub fn from(path: PathBuf) -> anyhow::Result<Self> {
+    pub fn from(path: PathBuf) -> ParseResult<Self> {
         let mut dockerfile = Dockerfile::new(path);
         dockerfile.instructions = dockerfile.parse()?;
         Ok(dockerfile)
     }
 
-    pub fn parse(&self) -> Result<Vec<Instruction>, ParseError> {
+    pub fn parse(&self) -> ParseResult<Vec<Instruction>> {
         let lines = read_lines(&self.path);
         let mut instructions = Vec::new();
 
@@ -61,7 +62,7 @@ impl Dockerfile {
             } else if line.starts_with(HASHTAG) {
                 instructions.push(Instruction::Comment(line.to_string()));
             } else {
-                let (instruction, arguments) = tokenize_line(&line)?;
+                let (instruction, arguments) = split_instruction_and_arguments(&line)?;
                 let instruction = match instruction.as_str() {
                     "ADD" => add::parse(arguments),
                     "ARG" => arg::parse(arguments),
@@ -85,7 +86,7 @@ impl Dockerfile {
         Ok(instructions)
     }
 
-    pub fn dump(&self) -> anyhow::Result<()> {
+    pub fn dump(&self) -> std::io::Result<()> {
         let mut file = File::create(&self.path)?;
         for instruction in &self.instructions {
             writeln!(file, "{}", instruction)?;

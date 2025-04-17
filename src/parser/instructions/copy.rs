@@ -1,5 +1,5 @@
 use crate::ast::Instruction;
-use crate::parser::options::get_options_from;
+use crate::parser::utils::get_options_from;
 
 pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     let (options_map, remaining) = get_options_from(arguments);

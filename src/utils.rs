@@ -3,6 +3,9 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::path::PathBuf;
 
+use once_cell::sync::Lazy;
+use regex::Regex;
+
 use crate::error::ParseError;
 use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
@@ -15,8 +18,7 @@ pub fn read_lines(path: &PathBuf) -> Vec<String> {
     let mut lines = Vec::new();
     let mut current = String::new();
 
-    for line in reader.lines() {
-        let line = line.unwrap_or_else(|e| panic!("Error reading line: {}", e));
+    for line in reader.lines().map_while(Result::ok) {
         let trimmed = line.trim();
 
         // skip inline comments
@@ -39,13 +41,14 @@ pub fn read_lines(path: &PathBuf) -> Vec<String> {
     lines
 }
 
-pub fn tokenize_line(line: &str) -> Result<(String, Vec<String>), ParseError> {
+pub fn split_instruction_and_arguments(line: &str) -> Result<(String, Vec<String>), ParseError> {
     // https://docs.docker.com/reference/dockerfile/#format
-    let regex = regex::Regex::new(r"^(?P<instruction>[A-Z]+)\s*(?P<arguments>.*)").unwrap();
+    static RE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"^(?P<instruction>[A-Z][A-Z0-9]*)\s+(?P<arguments>.*)$").unwrap());
 
-    let captures = regex
+    let captures = RE
         .captures(line)
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?;
+        .ok_or_else(|| ParseError::SyntaxError(line.to_owned()))?;
 
     let instruction = captures
         .name("instruction")
@@ -59,9 +62,25 @@ pub fn tokenize_line(line: &str) -> Result<(String, Vec<String>), ParseError> {
 
     Ok((
         instruction.to_string(),
-        arguments
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect(),
+        arguments.split_whitespace().map(String::from).collect(),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_lowercase_instruction_fails() {
+        let line = "run arg1 arg2";
+        let result = split_instruction_and_arguments(line);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_split_empty_line_fails() {
+        let line = "";
+        let result = split_instruction_and_arguments(line);
+        assert!(result.is_err());
+    }
 }

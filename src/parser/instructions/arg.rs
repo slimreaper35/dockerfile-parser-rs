@@ -7,8 +7,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         .first()
         .ok_or_else(|| anyhow::anyhow!("Missing argument for ARG instruction"))?;
 
-    if name.contains(EQUALS) && name.split(EQUALS).count() == 2 {
-        let (key, value) = name.split_once(EQUALS).unwrap();
+    if let Some((key, value)) = name.split_once(EQUALS) {
         let value = value
             .trim_start_matches(DOUBLE_QUOTE)
             .trim_end_matches(DOUBLE_QUOTE);
