@@ -20,7 +20,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
 
     Ok(Instruction::From {
         platform,
-        image: image.to_string(),
-        alias: alias.map(|s| s.to_string()),
+        image: image.to_owned(),
+        alias: alias.map(String::from),
     })
 }

@@ -13,12 +13,12 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
             .trim_end_matches(DOUBLE_QUOTE);
 
         Ok(Instruction::Arg {
-            name: key.to_string(),
-            default: Some(value.to_string()),
+            name: key.to_owned(),
+            default: Some(value.to_owned()),
         })
     } else {
         Ok(Instruction::Arg {
-            name: name.to_string(),
+            name: name.to_owned(),
             default: None,
         })
     }

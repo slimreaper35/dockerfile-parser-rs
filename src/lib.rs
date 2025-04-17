@@ -60,7 +60,7 @@ impl Dockerfile {
                 instructions.push(Instruction::Empty);
             // preserve comments
             } else if line.starts_with(HASHTAG) {
-                instructions.push(Instruction::Comment(line.to_string()));
+                instructions.push(Instruction::Comment(line.to_owned()));
             } else {
                 let (instruction, arguments) = split_instruction_and_arguments(&line)?;
                 let instruction = match instruction.as_str() {

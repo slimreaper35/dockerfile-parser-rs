@@ -8,8 +8,8 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
 
     // check if there is a group
     let (user, group) = match user.split_once(COLON) {
-        Some((user, group)) => (user.to_string(), Some(group.to_string())),
-        None => (user.to_string(), None),
+        Some((user, group)) => (user.to_owned(), Some(group.to_owned())),
+        None => (user.to_owned(), None),
     };
 
     Ok(Instruction::User { user, group })

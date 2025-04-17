@@ -11,8 +11,8 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
 
     // check if there is a protocol
     let (port, protocol) = match port.split_once(SLASH) {
-        Some((port, protocol)) => (port.to_string(), Some(Protocol::from_str(protocol)?)),
-        None => (port.to_string(), None),
+        Some((port, protocol)) => (port.to_owned(), Some(Protocol::from_str(protocol)?)),
+        None => (port.to_owned(), None),
     };
 
     Ok(Instruction::Expose { port, protocol })

@@ -52,16 +52,16 @@ pub fn split_instruction_and_arguments(line: &str) -> Result<(String, Vec<String
 
     let instruction = captures
         .name("instruction")
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
+        .ok_or_else(|| ParseError::SyntaxError(line.to_owned()))?
         .as_str();
 
     let arguments = captures
         .name("arguments")
-        .ok_or_else(|| ParseError::SyntaxError(line.to_string()))?
+        .ok_or_else(|| ParseError::SyntaxError(line.to_owned()))?
         .as_str();
 
     Ok((
-        instruction.to_string(),
+        instruction.to_owned(),
         arguments.split_whitespace().map(String::from).collect(),
     ))
 }

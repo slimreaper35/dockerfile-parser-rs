@@ -24,7 +24,7 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
     for arg in &arguments {
         if let Some(stripped) = arg.strip_prefix(HYPHEN_MINUS) {
             if let Some((key, value)) = stripped.split_once(EQUALS) {
-                options.insert(key.to_string(), value.to_string());
+                options.insert(key.to_owned(), value.to_owned());
                 continue;
             }
         }
@@ -42,7 +42,7 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
 
     for arg in arguments {
         let (key, value) = match arg.split_once(EQUALS) {
-            Some((key, value)) => (key.to_string(), value.to_string()),
+            Some((key, value)) => (key.to_owned(), value.to_owned()),
             None => {
                 // try to append the value to the last key
                 if last_key.is_none() {
@@ -62,7 +62,7 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
             .trim_start_matches(DOUBLE_QUOTE)
             .trim_end_matches(DOUBLE_QUOTE);
 
-        result.insert(key.to_string(), value.to_string());
+        result.insert(key.to_owned(), value.to_owned());
         last_key = Some(key);
     }
 
