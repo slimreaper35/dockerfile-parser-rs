@@ -16,6 +16,7 @@ The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 - FROM
 - LABEL
 - RUN
+- SHELL
 - USER
 - VOLUME
 - WORKDIR

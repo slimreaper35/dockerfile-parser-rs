@@ -11,13 +11,13 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
 
     if is_exec_form(&arguments) {
         for arg in arguments {
-            let entry = arg
+            let arg = arg
                 .trim_start_matches(LEFT_BRACKET)
                 .trim_end_matches(RIGHT_BRACKET)
                 .replace([DOUBLE_QUOTE, COMMA], EMPTY);
 
-            if !entry.is_empty() {
-                entrypoint.push(entry);
+            if !arg.is_empty() {
+                entrypoint.push(arg);
             }
         }
     } else {

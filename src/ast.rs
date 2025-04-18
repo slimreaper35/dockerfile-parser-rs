@@ -46,6 +46,7 @@ pub enum Instruction {
         security: Option<String>,
         command: Vec<String>,
     },
+    Shell(Vec<String>),
     User {
         user: String,
         group: Option<String>,
@@ -183,6 +184,7 @@ impl fmt::Display for Instruction {
                     .join(" ");
                 write!(f, "RUN {}{:?}", options_string, command)
             }
+            Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
             Instruction::User { user, group } => {
                 if let Some(group) = group {
                     write!(f, "USER {}:{}", user, group)

@@ -4,9 +4,10 @@ version = "0.1.2"
 authors = ["Michal Šoltis <msoltis1@icloud.com>"]
 edition = "2024"
 description = "The ultimate Rust library for parsing, modifying, and generating Dockerfiles"
-license = "MIT"
-repository = "https://github.com/slimreaper35/dockerfile-parser-rs"
+documentation = "https://docs.rs/dockerfile-parser-rs/latest/dockerfile_parser_rs"
 readme = "README.md"
+repository = "https://github.com/slimreaper35/dockerfile-parser-rs"
+license = "MIT"
 keywords = ["containers", "docker", "dockerfile", "library", "parser"]
 
 [dependencies]
