@@ -10,6 +10,9 @@ repository = "https://github.com/slimreaper35/dockerfile-parser-rs"
 license = "MIT"
 keywords = ["containers", "docker", "dockerfile", "library", "parser"]
 
+[lib]
+doctest = false
+
 [dependencies]
 anyhow = "1.0.97"
 once_cell = "1.21.3"

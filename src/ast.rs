@@ -7,6 +7,7 @@ use strum_macros::EnumString;
 
 #[derive(Debug, EnumString)]
 #[strum(serialize_all = "lowercase")]
+/// This enum represents available protocols for the EXPOSE instruction in a Dockerfile.
 pub enum Protocol {
     Tcp,
     Udp,
@@ -14,6 +15,7 @@ pub enum Protocol {
 
 #[derive(Debug, EnumString)]
 #[strum(serialize_all = "UPPERCASE")]
+/// This enum represents available instructions in a Dockerfile.
 pub enum Instruction {
     Add {
         checksum: Option<String>,
