@@ -84,13 +84,12 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    helpers::format_option("checksum", checksum),
-                    helpers::format_option("chown", chown),
-                    helpers::format_option("chmod", chmod),
-                    helpers::format_option("link", link),
+                    helpers::format_instruction_option("checksum", checksum),
+                    helpers::format_instruction_option("chown", chown),
+                    helpers::format_instruction_option("chmod", chmod),
+                    helpers::format_instruction_option("link", link),
                 ];
-                let options_string = helpers::format_multiple(options);
-
+                let options_string = helpers::format_options_string(options);
                 let prefix = if options_string.is_empty() {
                     String::new()
                 } else {
@@ -115,27 +114,22 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    helpers::format_option("from", from),
-                    helpers::format_option("chown", chown),
-                    helpers::format_option("chmod", chmod),
-                    helpers::format_option("link", link),
+                    helpers::format_instruction_option("from", from),
+                    helpers::format_instruction_option("chown", chown),
+                    helpers::format_instruction_option("chmod", chmod),
+                    helpers::format_instruction_option("link", link),
                 ];
-                let options_string = helpers::format_multiple(options);
-                write!(
-                    f,
-                    "COPY {}{} {}",
-                    options_string,
-                    sources.join(" "),
-                    destination
-                )
+                let options_string = helpers::format_options_string(options);
+                let prefix = if options_string.is_empty() {
+                    String::new()
+                } else {
+                    format!("{} ", options_string)
+                };
+                write!(f, "COPY {}{} {}", prefix, sources.join(" "), destination)
             }
             Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
             Instruction::Env(env) => {
-                let mut env_vars = Vec::new();
-                for (key, value) in env {
-                    env_vars.push(format!("{}=\"{}\"", key, value));
-                }
-                write!(f, "ENV {}", env_vars.join(" "))
+                write!(f, "ENV {}", helpers::format_hash_map(env))
             }
             Instruction::Expose { port, protocol } => {
                 if let Some(protocol) = protocol {
@@ -149,22 +143,22 @@ impl fmt::Display for Instruction {
                 image,
                 alias,
             } => {
-                let mut line = String::new();
-                if let Some(platform) = platform {
-                    line.push_str(&format!("--platform={} ", platform));
-                }
-                line.push_str(image);
+                let options = vec![helpers::format_instruction_option("platform", platform)];
+                let options_string = helpers::format_options_string(options);
+                let prefix = if options_string.is_empty() {
+                    String::new()
+                } else {
+                    format!("{} ", options_string)
+                };
+                let mut line = format!("FROM {}{}", prefix, image);
+
                 if let Some(alias) = alias {
                     line.push_str(&format!(" AS {}", alias));
                 }
                 write!(f, "FROM {}", line)
             }
             Instruction::Label(labels) => {
-                let mut label_pairs = Vec::new();
-                for (key, value) in labels {
-                    label_pairs.push(format!("{}=\"{}\"", key, value));
-                }
-                write!(f, "LABEL {}", label_pairs.join(" "))
+                write!(f, "LABEL {}", helpers::format_hash_map(labels))
             }
             Instruction::Run {
                 mount,
@@ -173,11 +167,11 @@ impl fmt::Display for Instruction {
                 command,
             } => {
                 let options = vec![
-                    helpers::format_option("mount", mount),
-                    helpers::format_option("network", network),
-                    helpers::format_option("security", security),
+                    helpers::format_instruction_option("mount", mount),
+                    helpers::format_instruction_option("network", network),
+                    helpers::format_instruction_option("security", security),
                 ];
-                let options_string = helpers::format_multiple(options);
+                let options_string = helpers::format_options_string(options);
                 write!(f, "RUN {}{:?}", options_string, command)
             }
             Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
@@ -200,18 +194,27 @@ impl fmt::Display for Instruction {
 }
 
 mod helpers {
+    use super::*;
 
-    pub fn format_option(key: &str, value: &Option<String>) -> String {
+    pub fn format_instruction_option(key: &str, value: &Option<String>) -> String {
         value
             .as_ref()
             .map(|v| format!("--{}={}", key, v))
             .unwrap_or_default()
     }
 
-    pub fn format_multiple(options: Vec<String>) -> String {
+    pub fn format_options_string(options: Vec<String>) -> String {
         options
             .into_iter()
             .filter(|s| !s.is_empty())
+            .collect::<Vec<String>>()
+            .join(" ")
+    }
+
+    pub fn format_hash_map(pairs: &HashMap<String, String>) -> String {
+        pairs
+            .iter()
+            .map(|(key, value)| format!("{}=\"{}\"", key, value))
             .collect::<Vec<String>>()
             .join(" ")
     }
