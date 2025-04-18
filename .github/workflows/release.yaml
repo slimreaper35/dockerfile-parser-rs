@@ -3,6 +3,10 @@ name: Release
 on:
   push:
     tags: ["*.*.*"]
+
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
 
