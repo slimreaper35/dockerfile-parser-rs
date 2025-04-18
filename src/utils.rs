@@ -6,6 +6,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 use crate::error::ParseError;
+use crate::file::ParseResult;
 use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
 use crate::symbols::chars::SPACE;
@@ -35,14 +36,14 @@ pub fn read_lines(file: &File) -> Vec<String> {
             current = String::new();
         }
     }
-
     lines
 }
 
-pub fn split_instruction_and_arguments(line: &str) -> Result<(String, Vec<String>), ParseError> {
+pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<String>)> {
     // https://docs.docker.com/reference/dockerfile/#format
-    static RE: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"^(?P<instruction>[A-Z][A-Z0-9]*)\s+(?P<arguments>.*)$").unwrap());
+    static RE: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"^(?P<instruction>[A-Z][A-Z0-9]*)\s+(?P<arguments>\S.+)$").unwrap()
+    });
 
     let captures = RE
         .captures(line)
@@ -69,6 +70,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_split_empty_line_fails() {
+        let line = "";
+        let result = split_instruction_and_arguments(line);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn test_split_lowercase_instruction_fails() {
         let line = "run arg1 arg2";
         let result = split_instruction_and_arguments(line);
@@ -76,9 +84,20 @@ mod tests {
     }
 
     #[test]
-    fn test_split_empty_line_fails() {
-        let line = "";
+    fn test_split_instruction_and_missing_arguments_fails() {
+        let line = "RUN";
         let result = split_instruction_and_arguments(line);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_split_instruction_and_arguments() {
+        let line = "RUN arg1 arg2";
+        let result = split_instruction_and_arguments(line);
+        assert!(result.is_ok());
+
+        let (instruction, arguments) = result.unwrap();
+        assert_eq!(instruction, "RUN");
+        assert_eq!(arguments, vec!["arg1", "arg2"]);
     }
 }

@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+use crate::symbols::chars::COMMA;
 use crate::symbols::chars::DOUBLE_QUOTE;
 use crate::symbols::chars::EQUALS;
 use crate::symbols::chars::LEFT_BRACKET;
 use crate::symbols::chars::RIGHT_BRACKET;
+use crate::symbols::strings::EMPTY;
 use crate::symbols::strings::HYPHEN_MINUS;
 
 pub fn is_exec_form(arguments: &[String]) -> bool {
@@ -11,6 +13,18 @@ pub fn is_exec_form(arguments: &[String]) -> bool {
         (arguments.first(), arguments.last()),
         (Some(first), Some(last)) if first.starts_with(LEFT_BRACKET) && last.ends_with(RIGHT_BRACKET)
     )
+}
+
+pub fn clean_exec_form_arguments(arguments: Vec<String>) -> Vec<String> {
+    arguments
+        .iter()
+        .map(|arg| {
+            arg.trim_start_matches(LEFT_BRACKET)
+                .trim_end_matches(RIGHT_BRACKET)
+                .replace([DOUBLE_QUOTE, COMMA], EMPTY)
+        })
+        .filter(|arg| !arg.is_empty())
+        .collect()
 }
 
 pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec<String>) {

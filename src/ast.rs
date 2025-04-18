@@ -5,7 +5,15 @@ use std::fmt;
 
 use strum_macros::EnumString;
 
-#[derive(Debug)]
+#[derive(Debug, EnumString)]
+#[strum(serialize_all = "lowercase")]
+pub enum Protocol {
+    Tcp,
+    Udp,
+}
+
+#[derive(Debug, EnumString)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Instruction {
     Add {
         checksum: Option<String>,
@@ -76,23 +84,19 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    format_option("checksum", checksum.clone()),
-                    format_option("chown", chown.clone()),
-                    format_option("chmod", chmod.clone()),
-                    format_option("link", link.clone()),
+                    helpers::format_option("checksum", checksum),
+                    helpers::format_option("chown", chown),
+                    helpers::format_option("chmod", chmod),
+                    helpers::format_option("link", link),
                 ];
-                let options_string = options
-                    .into_iter()
-                    .filter(|s| !s.is_empty())
-                    .collect::<Vec<String>>()
-                    .join(" ");
-                write!(
-                    f,
-                    "ADD {}{} {}",
-                    options_string,
-                    sources.join(" "),
-                    destination
-                )
+                let options_string = helpers::format_multiple(options);
+
+                let prefix = if options_string.is_empty() {
+                    String::new()
+                } else {
+                    format!("{} ", options_string)
+                };
+                write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
             Instruction::Arg { name, default } => {
                 if let Some(default) = default {
@@ -111,16 +115,12 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    format_option("from", from.clone()),
-                    format_option("chown", chown.clone()),
-                    format_option("chmod", chmod.clone()),
-                    format_option("link", link.clone()),
+                    helpers::format_option("from", from),
+                    helpers::format_option("chown", chown),
+                    helpers::format_option("chmod", chmod),
+                    helpers::format_option("link", link),
                 ];
-                let options_string = options
-                    .into_iter()
-                    .filter(|s| !s.is_empty())
-                    .collect::<Vec<String>>()
-                    .join(" ");
+                let options_string = helpers::format_multiple(options);
                 write!(
                     f,
                     "COPY {}{} {}",
@@ -173,15 +173,11 @@ impl fmt::Display for Instruction {
                 command,
             } => {
                 let options = vec![
-                    format_option("mount", mount.clone()),
-                    format_option("network", network.clone()),
-                    format_option("security", security.clone()),
+                    helpers::format_option("mount", mount),
+                    helpers::format_option("network", network),
+                    helpers::format_option("security", security),
                 ];
-                let options_string = options
-                    .into_iter()
-                    .filter(|s| !s.is_empty())
-                    .collect::<Vec<String>>()
-                    .join(" ");
+                let options_string = helpers::format_multiple(options);
                 write!(f, "RUN {}{:?}", options_string, command)
             }
             Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
@@ -203,15 +199,20 @@ impl fmt::Display for Instruction {
     }
 }
 
-fn format_option(key: &str, value: Option<String>) -> String {
-    value
-        .map(|v| format!("--{}={}", key, v))
-        .unwrap_or_default()
-}
+mod helpers {
 
-#[derive(Debug, EnumString)]
-#[strum(serialize_all = "lowercase")]
-pub enum Protocol {
-    Tcp,
-    Udp,
+    pub fn format_option(key: &str, value: &Option<String>) -> String {
+        value
+            .as_ref()
+            .map(|v| format!("--{}={}", key, v))
+            .unwrap_or_default()
+    }
+
+    pub fn format_multiple(options: Vec<String>) -> String {
+        options
+            .into_iter()
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<String>>()
+            .join(" ")
+    }
 }
