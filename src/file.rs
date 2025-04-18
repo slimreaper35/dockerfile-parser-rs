@@ -32,44 +32,25 @@ pub struct Dockerfile {
 }
 
 impl Dockerfile {
-    /// Creates a new empty `Dockerfile` instance for the given path.
+    /// Creates a new `Dockerfile` instance for the given path and instructions.
     ///
-    /// # Notes
+    /// The actual file does not need to exist at this point.
     ///
-    /// * The actual file does not need to exist at this point.
+    pub fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
+        Dockerfile { path, instructions }
+    }
+
+    /// Creates an empty `Dockerfile` instance for the given path.
     ///
-    /// # Example
+    /// The actual file does not need to exist at this point.
     ///
-    /// ```
-    /// use std::path::PathBuf;
-    ///
-    /// use dockerfile_parser_rs::Dockerfile;
-    /// use dockerfile_parser_rs::Instruction;
-    ///
-    /// let mut dockerfile = Dockerfile::new(PathBuf::from("./Dockerfile"));
-    /// dockerfile.instructions.push(Instruction::From {
-    ///     platform: None,
-    ///     image: String::from("docker.io/library/ubuntu:latest"),
-    ///     alias: None,
-    /// });
-    /// ```
-    ///
-    pub fn new(path: PathBuf) -> Self {
-        Dockerfile {
-            path,
-            instructions: Vec::new(),
-        }
+    pub fn empty(path: PathBuf) -> Self {
+        Dockerfile::new(path, Vec::new())
     }
 
     /// Parses the content of the Dockerfile and returns a populated `Dockerfile` instance.
     ///
-    /// # Notes
-    ///
-    /// * The file is read line by line, preserving empty lines and comments.
-    ///
-    /// # Errors
-    ///
-    /// Returns a [`ParseError`] if the file cannot be read or parsed correctly.
+    /// The file is read line by line, preserving empty lines and comments.
     ///
     /// # Example
     ///
@@ -87,21 +68,16 @@ impl Dockerfile {
     /// ```
     ///
     pub fn from(path: PathBuf) -> ParseResult<Self> {
-        let mut dockerfile = Dockerfile::new(path);
+        let mut dockerfile = Dockerfile::empty(path);
         dockerfile.instructions = dockerfile.parse()?;
         Ok(dockerfile)
     }
 
     /// Parses the content of the Dockerfile and returns a vector of `Instruction` items.
     ///
-    /// # Notes
+    /// The file is read line by line, preserving empty lines and comments.
     ///
-    /// * The attributes of the `Dockerfile` instance are unmodified.
-    /// * The file is read line by line, preserving empty lines and comments.
-    ///
-    /// # Errors
-    ///
-    /// Returns a [`ParseError`] if the file cannot be read or parsed correctly.
+    /// **The attributes of the `Dockerfile` instance are not modified by this method.**
     ///
     /// # Example
     ///
@@ -112,7 +88,7 @@ impl Dockerfile {
     /// use dockerfile_parser_rs::ParseResult;
     ///
     /// fn main() -> ParseResult<()> {
-    ///     let dockerfile = Dockerfile::new(PathBuf::from("./Dockerfile"));
+    ///     let dockerfile = Dockerfile::empty(PathBuf::from("./Dockerfile"));
     ///     let instructions = dockerfile.parse()?;
     ///     println!("{:?}", instructions);
     ///     Ok(())
@@ -160,29 +136,8 @@ impl Dockerfile {
 
     /// Dumps the current instructions into the Dockerfile.
     ///
-    /// # Errors
-    ///
-    /// Returns an [`std::io::Error`] if writing to the file fails.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use std::path::PathBuf;
-    ///
-    /// use dockerfile_parser_rs::Dockerfile;
-    /// use dockerfile_parser_rs::Instruction;
-    /// use dockerfile_parser_rs::ParseResult;
-    ///
-    /// fn main() -> ParseResult<()> {
-    ///     let mut dockerfile = Dockerfile::from(PathBuf::from("Dockerfile"))?;
-    ///     dockerfile.instructions.push(Instruction::User {
-    ///         user: String::from("1001"),
-    ///         group: None,
-    ///     });
-    ///     dockerfile.dump().unwrap();
-    ///     Ok(())
-    /// }
-    /// ```
+    /// If the file does not exist, it will be created.
+    /// If the file exists, it will be overwritten.
     ///
     pub fn dump(&self) -> std::io::Result<()> {
         let mut file = File::create(&self.path)?;
