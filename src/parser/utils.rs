@@ -15,7 +15,7 @@ pub fn is_exec_form(arguments: &[String]) -> bool {
     )
 }
 
-pub fn clean_exec_form_arguments(arguments: Vec<String>) -> Vec<String> {
+pub fn clean_exec_form(arguments: Vec<String>) -> Vec<String> {
     arguments
         .iter()
         .map(|arg| {
@@ -101,6 +101,22 @@ mod tests {
         assert!(!is_exec_form(&[String::from(
             "/usr/bin/executable arg1 arg2"
         )]));
+    }
+
+    #[test]
+    fn test_clean_exec_form() {
+        let exec_form = String::from("[\"/usr/bin/executable\", \"arg1\", \"arg2\"]");
+        let arguments = exec_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_exec_form(arguments);
+
+        assert_eq!(
+            cleaned,
+            vec![
+                String::from("/usr/bin/executable"),
+                String::from("arg1"),
+                String::from("arg2"),
+            ]
+        );
     }
 
     #[test]
