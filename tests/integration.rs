@@ -4,5 +4,6 @@ use dockerfile_parser_rs::Dockerfile;
 
 #[test]
 fn test_dockerfile_parse() {
-    Dockerfile::from(PathBuf::from("tests/Dockerfile")).unwrap();
+    let path = PathBuf::from("tests/data/Dockerfile");
+    Dockerfile::from(path).unwrap();
 }

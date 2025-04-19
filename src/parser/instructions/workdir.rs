@@ -1,11 +1,10 @@
 use crate::ast::Instruction;
 
 pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
-    let path = arguments
-        .first()
-        .ok_or_else(|| anyhow::anyhow!("Missing argument for WORKDIR instruction"))?;
+    if arguments.len() != 1 {
+        anyhow::bail!("The WORKDIR instruction must have exactly one argument");
+    }
 
-    Ok(Instruction::Workdir {
-        path: path.to_owned(),
-    })
+    let path = arguments.first().unwrap().to_owned();
+    Ok(Instruction::Workdir { path })
 }

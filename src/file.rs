@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+use crate::ParseResult;
 use crate::ast::Instruction;
 use crate::error::ParseError;
 use crate::parser::instructions::add;
@@ -21,8 +22,6 @@ use crate::parser::instructions::workdir;
 use crate::symbols::chars::HASHTAG;
 use crate::utils::read_lines;
 use crate::utils::split_instruction_and_arguments;
-
-pub type ParseResult<T> = Result<T, ParseError>;
 
 /// This struct represents a Dockerfile instance.
 #[derive(Debug)]
@@ -126,9 +125,13 @@ impl Dockerfile {
                     "VOLUME" => volume::parse(arguments),
                     "WORKDIR" => workdir::parse(arguments),
                     _ => return Err(ParseError::UnknownInstruction(instruction)),
+                };
+                match instruction {
+                    Ok(instruction) => instructions.push(instruction),
+                    Err(e) => {
+                        return Err(ParseError::SyntaxError(format!("{}: {}", line, e)));
+                    }
                 }
-                .map_err(|e| ParseError::SyntaxError(e.to_string()))?;
-                instructions.push(instruction);
             }
         }
         Ok(instructions)

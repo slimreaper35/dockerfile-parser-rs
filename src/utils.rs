@@ -5,8 +5,8 @@ use std::io::BufReader;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+use crate::ParseResult;
 use crate::error::ParseError;
-use crate::file::ParseResult;
 use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
 use crate::symbols::chars::SPACE;
