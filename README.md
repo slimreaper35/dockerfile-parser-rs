@@ -42,7 +42,8 @@ use dockerfile_parser_rs::Dockerfile;
 use dockerfile_parser_rs::Instruction;
 
 fn main() {
-    let mut dockerfile = Dockerfile::from(PathBuf::from("Dockerfile")).unwrap();
+    let path = PathBuf::from("Dockerfile");
+    let mut dockerfile = Dockerfile::from(path).unwrap();
 
     dockerfile.instructions.push(Instruction::User {
         user: String::from("1001"),

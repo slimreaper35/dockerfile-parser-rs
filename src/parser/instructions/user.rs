@@ -6,11 +6,11 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         anyhow::bail!("The USER instruction must have exactly one argument");
     }
 
-    let user = arguments.first().unwrap();
+    let user = arguments.first().unwrap().to_owned();
     // check if there is a group
     let (user, group) = match user.split_once(COLON) {
         Some((user, group)) => (user.to_owned(), Some(group.to_owned())),
-        None => (user.to_owned(), None),
+        None => (user, None),
     };
 
     Ok(Instruction::User { user, group })

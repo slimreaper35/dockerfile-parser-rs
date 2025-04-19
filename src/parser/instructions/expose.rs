@@ -9,11 +9,11 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         anyhow::bail!("The EXPOSE instruction must have exactly one argument");
     }
 
-    let port = arguments.first().unwrap();
+    let port = arguments.first().unwrap().to_owned();
     // check if there is a protocol
     let (port, protocol) = match port.split_once(SLASH) {
         Some((port, protocol)) => (port.to_owned(), Some(parse_protocol(protocol)?)),
-        None => (port.to_owned(), None),
+        None => (port, None),
     };
 
     Ok(Instruction::Expose { port, protocol })

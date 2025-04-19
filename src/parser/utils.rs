@@ -248,4 +248,28 @@ mod tests {
             Some(String::from("value2 with spaces")).as_ref()
         );
     }
+
+    #[test]
+    fn test_process_optional_key_value_pairs_without_quotes() {
+        let arguments = vec![String::from("key1=value1"), String::from("key2")];
+        let result = process_optional_key_value_pairs(&arguments);
+
+        assert_eq!(
+            result.get("key1"),
+            Some(Some(String::from("value1"))).as_ref()
+        );
+        assert_eq!(result.get("key2"), Some(None).as_ref());
+    }
+
+    #[test]
+    fn test_process_optional_key_value_pairs_with_quotes() {
+        let arguments = vec![String::from("key1=\"value1\""), String::from("key2")];
+        let result = process_optional_key_value_pairs(&arguments);
+
+        assert_eq!(
+            result.get("key1"),
+            Some(Some(String::from("value1"))).as_ref()
+        );
+        assert_eq!(result.get("key2"), Some(None).as_ref());
+    }
 }
