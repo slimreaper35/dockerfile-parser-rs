@@ -53,8 +53,8 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
     for arg in arguments {
         let (key, value) = match arg.split_once(EQUALS) {
             Some((key, value)) => (key.to_owned(), value.to_owned()),
+            // try to append the value to the last key
             None => {
-                // try to append the value to the last key
                 if last_key.is_none() {
                     continue;
                 }
@@ -74,6 +74,29 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
 
         result.insert(key.to_owned(), value.to_owned());
         last_key = Some(key);
+    }
+
+    result
+}
+
+pub fn process_optional_key_value_pairs(arguments: &[String]) -> HashMap<String, Option<String>> {
+    let mut result = HashMap::new();
+
+    for arg in arguments {
+        let (key, value) = match arg.split_once(EQUALS) {
+            Some((key, value)) => (
+                key.to_owned(),
+                Some(
+                    value
+                        .trim_start_matches(DOUBLE_QUOTE)
+                        .trim_end_matches(DOUBLE_QUOTE)
+                        .to_owned(),
+                ),
+            ),
+            // ignore multi-word default values
+            None => (arg.to_owned(), None),
+        };
+        result.insert(key, value);
     }
 
     result

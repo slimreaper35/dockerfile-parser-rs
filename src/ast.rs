@@ -25,10 +25,7 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    Arg {
-        name: String,
-        default: Option<String>,
-    },
+    Arg(HashMap<String, Option<String>>),
     Cmd(Vec<String>),
     Copy {
         from: Option<String>,
@@ -99,12 +96,19 @@ impl fmt::Display for Instruction {
                 };
                 write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
-            Instruction::Arg { name, default } => {
-                if let Some(default) = default {
-                    write!(f, "ARG {}={}", name, default)
-                } else {
-                    write!(f, "ARG {}", name)
-                }
+            Instruction::Arg(args) => {
+                let arg_string = args
+                    .iter()
+                    .map(|(key, value)| {
+                        if let Some(default) = value {
+                            format!("{}={}", key, default)
+                        } else {
+                            key.to_owned()
+                        }
+                    })
+                    .collect::<Vec<String>>()
+                    .join(" ");
+                write!(f, "ARG {}", arg_string)
             }
             Instruction::Cmd(cmd) => write!(f, "CMD {:?}", cmd),
             Instruction::Copy {
