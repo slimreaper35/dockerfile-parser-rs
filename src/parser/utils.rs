@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 
 use crate::symbols::chars::COMMA;
@@ -46,8 +47,8 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
     (options, remaining)
 }
 
-pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> {
-    let mut result = HashMap::new();
+pub fn process_key_value_pairs(arguments: &[String]) -> BTreeMap<String, String> {
+    let mut result = BTreeMap::new();
     let mut last_key: Option<String> = None;
 
     for arg in arguments {
@@ -79,8 +80,8 @@ pub fn process_key_value_pairs(arguments: &[String]) -> HashMap<String, String> 
     result
 }
 
-pub fn process_optional_key_value_pairs(arguments: &[String]) -> HashMap<String, Option<String>> {
-    let mut result = HashMap::new();
+pub fn process_optional_key_value_pairs(arguments: &[String]) -> BTreeMap<String, Option<String>> {
+    let mut result = BTreeMap::new();
 
     for arg in arguments {
         let (key, value) = match arg.split_once(EQUALS) {

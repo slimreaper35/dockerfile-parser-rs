@@ -1,11 +1,12 @@
 // https://docs.docker.com/reference/dockerfile/#overview
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
+use strum_macros::Display;
 use strum_macros::EnumString;
 
-#[derive(Debug, EnumString)]
+#[derive(Debug, Display, EnumString)]
 #[strum(serialize_all = "lowercase")]
 /// This enum represents available protocols for the EXPOSE instruction in a Dockerfile.
 pub enum Protocol {
@@ -13,8 +14,7 @@ pub enum Protocol {
     Udp,
 }
 
-#[derive(Debug, EnumString)]
-#[strum(serialize_all = "UPPERCASE")]
+#[derive(Debug)]
 /// This enum represents available instructions in a Dockerfile.
 pub enum Instruction {
     Add {
@@ -25,7 +25,7 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    Arg(HashMap<String, Option<String>>),
+    Arg(BTreeMap<String, Option<String>>),
     Cmd(Vec<String>),
     Copy {
         from: Option<String>,
@@ -36,7 +36,7 @@ pub enum Instruction {
         destination: String,
     },
     Entrypoint(Vec<String>),
-    Env(HashMap<String, String>),
+    Env(BTreeMap<String, String>),
     Expose {
         port: String,
         protocol: Option<Protocol>,
@@ -46,7 +46,7 @@ pub enum Instruction {
         image: String,
         alias: Option<String>,
     },
-    Label(HashMap<String, String>),
+    Label(BTreeMap<String, String>),
     Run {
         mount: Option<String>,
         network: Option<String>,
@@ -135,11 +135,11 @@ impl fmt::Display for Instruction {
             }
             Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
             Instruction::Env(env) => {
-                write!(f, "ENV {}", helpers::format_hash_map(env))
+                write!(f, "ENV {}", helpers::format_btree_map(env))
             }
             Instruction::Expose { port, protocol } => {
                 if let Some(protocol) = protocol {
-                    write!(f, "EXPOSE {}/{:?}", port, protocol)
+                    write!(f, "EXPOSE {}/{}", port, protocol)
                 } else {
                     write!(f, "EXPOSE {}", port)
                 }
@@ -161,10 +161,10 @@ impl fmt::Display for Instruction {
                 if let Some(alias) = alias {
                     line.push_str(&format!(" AS {}", alias));
                 }
-                write!(f, "FROM {}", line)
+                write!(f, "{}", line)
             }
             Instruction::Label(labels) => {
-                write!(f, "LABEL {}", helpers::format_hash_map(labels))
+                write!(f, "LABEL {}", helpers::format_btree_map(labels))
             }
             Instruction::Run {
                 mount,
@@ -217,11 +217,190 @@ mod helpers {
             .join(" ")
     }
 
-    pub fn format_hash_map(pairs: &HashMap<String, String>) -> String {
+    pub fn format_btree_map(pairs: &BTreeMap<String, String>) -> String {
         pairs
             .iter()
             .map(|(key, value)| format!("{}=\"{}\"", key, value))
             .collect::<Vec<String>>()
             .join(" ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display_instruction_add() {
+        let instruction = Instruction::Add {
+            checksum: None,
+            chown: None,
+            chmod: None,
+            link: None,
+            sources: vec![String::from("source1"), String::from("source2")],
+            destination: String::from("/destination"),
+        };
+
+        let expected = "ADD source1 source2 /destination";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_arg() {
+        let instruction = Instruction::Arg(BTreeMap::from([
+            (String::from("ARG2"), None),
+            (String::from("ARG1"), Some(String::from("value1"))),
+        ]));
+
+        // must be sorted
+        let expected = "ARG ARG1=value1 ARG2";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_cmd() {
+        let instruction =
+            Instruction::Cmd(vec![String::from("echo"), String::from("Hello, World!")]);
+
+        let expected = "CMD [\"echo\", \"Hello, World!\"]";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_copy() {
+        let instruction = Instruction::Copy {
+            from: Some(String::from("builder")),
+            chown: None,
+            chmod: None,
+            link: None,
+            sources: vec![String::from("source1"), String::from("source2")],
+            destination: String::from("/destination"),
+        };
+
+        let expected = "COPY --from=builder source1 source2 /destination";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_entrypoint() {
+        let instruction = Instruction::Entrypoint(vec![String::from("entrypoint.sh")]);
+
+        let expected = "ENTRYPOINT [\"entrypoint.sh\"]";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_env() {
+        let instruction = Instruction::Env(BTreeMap::from([
+            (String::from("ENV2"), String::from("value2")),
+            (String::from("ENV1"), String::from("value1")),
+        ]));
+
+        // must be sorted
+        let expected = "ENV ENV1=\"value1\" ENV2=\"value2\"";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_expose() {
+        let instruction = Instruction::Expose {
+            port: String::from("8080"),
+            protocol: Some(Protocol::Udp),
+        };
+
+        let expected = "EXPOSE 8080/udp";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_from() {
+        let instruction = Instruction::From {
+            platform: Some(String::from("linux/amd64")),
+            image: String::from("docker.io/library/fedora:latest"),
+            alias: Some(String::from("builder")),
+        };
+
+        let expected = "FROM --platform=linux/amd64 docker.io/library/fedora:latest AS builder";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_label() {
+        let instruction = Instruction::Label(BTreeMap::from([
+            (String::from("version"), String::from("1.0")),
+            (String::from("maintainer"), String::from("John Doe")),
+        ]));
+
+        // must be sorted
+        let expected = "LABEL maintainer=\"John Doe\" version=\"1.0\"";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_run() {
+        let instruction = Instruction::Run {
+            mount: None,
+            network: None,
+            security: None,
+            command: vec![String::from("echo"), String::from("Hello, World!")],
+        };
+
+        let expected = "RUN [\"echo\", \"Hello, World!\"]";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_shell() {
+        let instruction = Instruction::Shell(vec![String::from("/bin/sh"), String::from("-c")]);
+
+        let expected = "SHELL [\"/bin/sh\", \"-c\"]";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_user() {
+        let instruction = Instruction::User {
+            user: String::from("root"),
+            group: Some(String::from("root")),
+        };
+
+        let expected = "USER root:root";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_volume() {
+        let instruction = Instruction::Volume {
+            mounts: vec![String::from("/data"), String::from("/var/log")],
+        };
+
+        let expected = "VOLUME [\"/data\", \"/var/log\"]";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_workdir() {
+        let instruction = Instruction::Workdir {
+            path: String::from("/app"),
+        };
+
+        let expected = "WORKDIR /app";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_comment() {
+        let instruction = Instruction::Comment(String::from("# This is a comment"));
+
+        let expected = "# This is a comment";
+        assert_eq!(format!("{}", instruction), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_empty() {
+        let instruction = Instruction::Empty;
+
+        let expected = "";
+        assert_eq!(format!("{}", instruction), expected);
     }
 }
