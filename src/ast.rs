@@ -54,6 +54,9 @@ pub enum Instruction {
         command: Vec<String>,
     },
     Shell(Vec<String>),
+    Stopsignal {
+        signal: String,
+    },
     User {
         user: String,
         group: Option<String>,
@@ -186,6 +189,7 @@ impl fmt::Display for Instruction {
                 write!(f, "RUN {}{:?}", prefix, command)
             }
             Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
+            Instruction::Stopsignal { signal } => write!(f, "STOPSIGNAL {}", signal),
             Instruction::User { user, group } => {
                 if let Some(group) = group {
                     write!(f, "USER {}:{}", user, group)

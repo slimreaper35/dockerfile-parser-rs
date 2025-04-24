@@ -29,6 +29,7 @@ pub fn clean_exec_form(arguments: Vec<String>) -> Vec<String> {
         .iter()
         .map(|arg| {
             arg.trim_start_matches(LEFT_BRACKET)
+                .trim_start_matches(COMMA)
                 .trim_end_matches(RIGHT_BRACKET)
                 .trim_end_matches(COMMA)
                 .replace(DOUBLE_QUOTE, EMPTY)
@@ -137,6 +138,22 @@ mod tests {
     }
 
     #[test]
+    fn test_clean_shell_form() {
+        let shell_form = String::from("echo \"Hello, World!\"");
+        let arguments = shell_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_shell_form(arguments);
+
+        assert_eq!(
+            cleaned,
+            vec![
+                String::from("echo"),
+                String::from("Hello,"),
+                String::from("World!")
+            ]
+        );
+    }
+
+    #[test]
     fn test_clean_exec_form() {
         let exec_form = String::from("[\"/usr/bin/executable\", \"arg1\", \"arg2\"]");
         let arguments = exec_form.split_whitespace().map(String::from).collect();
@@ -147,6 +164,24 @@ mod tests {
             vec![
                 String::from("/usr/bin/executable"),
                 String::from("arg1"),
+                String::from("arg2"),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_clean_exec_form_with_spaces() {
+        let exec_form = String::from("[\"/usr/bin/executable\", \"arg1 with spaces\", \"arg2\"]");
+        let arguments = exec_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_exec_form(arguments);
+
+        assert_eq!(
+            cleaned,
+            vec![
+                String::from("/usr/bin/executable"),
+                String::from("arg1"),
+                String::from("with"),
+                String::from("spaces"),
                 String::from("arg2"),
             ]
         );

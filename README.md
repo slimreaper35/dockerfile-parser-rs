@@ -6,9 +6,6 @@ The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 
 ## Instructions
 
-The instructions are not case-sensitive. However, the library works only with uppercase instructions
-for simplicity and consistency.
-
 - ADD
 - ARG
 - CMD
@@ -20,13 +17,14 @@ for simplicity and consistency.
 - LABEL
 - RUN
 - SHELL
+- STOPSIGNAL
 - USER
 - VOLUME
 - WORKDIR
 
 **Note:** In addition to the official
-[Dockerfile instructions](https://docs.docker.com/reference/dockerfile/#overview), this library also
-supports placeholders for empty lines and comments.
+[Dockerfile instructions](https://docs.docker.com/reference/dockerfile/#overview), empty lines and
+comments are supported too.
 
 ## Install
 
@@ -59,6 +57,10 @@ fn main() {
 
 ## Limitations
 
+...or things to keep in mind when using this library.
+
+### Shell and exec form
+
 The `RUN`, `CMD`, and `ENTRYPOINT` instructions all have two possible forms:
 
 - `INSTRUCTION ["executable", "param1", "param2"]` (exec form)
@@ -68,7 +70,19 @@ The exec form makes it possible to avoid shell string munging and to invoke comm
 specific command shell, or any other executable. It uses a JSON array syntax, where each element in
 the array is a command, flag, or argument.
 
-The library parses both forms, but only the exec form is supported for writing instructions back into
-a Dockerfile. Internally, these instructions are stored as a vector of strings.
+The library parses both forms, but only the exec form is supported for writing instructions back
+into a Dockerfile.
 
 **Note:** The `SHELL` instruction must be written in JSON (exec) form in a Dockerfile.
+
+### Instruction arguments ordering
+
+Options for all instructions will be sorted in alphabetical order. This is done to ensure
+deterministic output when dumping a Dockerfile. The same applies to the `ARG`, `ENV`, and `LABEL`
+instructions when they have multiple key-value pairs defined on one line.
+
+### Instruction case sensitivity
+
+The instructions are not case-sensitive. However, the library works only with uppercase instructions
+for simplicity and consistency. Using uppercase instructions is also recommended convention in
+[Dockerfile](https://docs.docker.com/reference/dockerfile/#format) format documentation.

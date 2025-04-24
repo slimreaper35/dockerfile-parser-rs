@@ -9,6 +9,7 @@ pub mod from;
 pub mod label;
 pub mod run;
 pub mod shell;
+pub mod stopsignal;
 pub mod user;
 pub mod volume;
 pub mod workdir;

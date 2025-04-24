@@ -16,6 +16,7 @@ use crate::parser::instructions::from;
 use crate::parser::instructions::label;
 use crate::parser::instructions::run;
 use crate::parser::instructions::shell;
+use crate::parser::instructions::stopsignal;
 use crate::parser::instructions::user;
 use crate::parser::instructions::volume;
 use crate::parser::instructions::workdir;
@@ -121,6 +122,7 @@ impl Dockerfile {
                     "FROM" => from::parse(arguments),
                     "RUN" => run::parse(arguments),
                     "SHELL" => shell::parse(arguments),
+                    "STOPSIGNAL" => stopsignal::parse(arguments),
                     "USER" => user::parse(arguments),
                     "VOLUME" => volume::parse(arguments),
                     "WORKDIR" => workdir::parse(arguments),
