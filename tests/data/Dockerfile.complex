@@ -1,7 +1,75 @@
-FROM docker.io/library/ubuntu:latest AS base
+#############
+## ChatGPT ##
+#############
 
-LABEL maintainer="John Doe"
+FROM --platform=linux/amd64 rust:1.70-slim-buster AS builder
 
-RUN ["echo", "Hello,", "World!"]
+# Set up metadata
+LABEL maintainer="John Doe" version="1.0"
 
-ENTRYPOINT ["/bin/bash", "-c"]
+ARG CARGO_HOME=/usr/local/cargo
+ARG RUSTUP_HOME=/usr/local/rustup
+
+# Ensure Cargo bin is in PATH and enable full backtraces
+ENV PATH="${CARGO_HOME}/bin:${PATH}" RUST_BACKTRACE="full"
+
+# Use strict shell options for safety
+SHELL ["bash", "-euxo", "pipefail", "-c"]
+
+# Install stable toolchain and cargo-chef for caching
+RUN ["rustup", "default", "stable"]
+RUN ["cargo", "install", "cargo-chef", "--locked"]
+
+WORKDIR /app
+
+# Copy helper scripts
+ADD scripts/ /app/scripts/
+
+# Make scripts executable
+RUN ["chmod", "+x", "/app/scripts/install-deps.sh"]
+
+# Cache dependency resolution
+COPY Cargo.toml Cargo.lock ./
+RUN ["cargo", "chef", "prepare", "--recipe-path", "recipe.json"]
+
+# Copy source and build
+COPY . ./
+RUN ["cargo", "chef", "cook", "--release", "--recipe-path", "recipe.json"]
+RUN ["cargo", "build", "--release", "--locked"]
+
+FROM --platform=linux/amd64 debian:stable-slim
+
+ARG APP_USER=appuser
+ARG APP_GROUP=appgroup
+
+# Create non-root user and group
+RUN ["groupadd", "-r", "--gid", "1000", "${APP_GROUP}"]
+RUN ["useradd", "-r", "--uid", "1000", "--gid", "${APP_GROUP}", "--home-dir", "/app", "--shell", "/sbin/nologin", "${APP_USER}"]
+
+WORKDIR "/app"
+
+# Copy the built binary
+COPY --from=builder /app/target/release/myapp /app/myapp
+
+# Default runtime environment
+ENV RUST_ENV="production" RUST_LOG="info" TZ="UTC"
+
+# Use lightweight shell
+SHELL ["sh", "-c"]
+
+# Persist data and logs
+VOLUME ["/app/data", "/app/logs"]
+
+# Expose application ports separately
+EXPOSE 8080/tcp
+EXPOSE 8080/udp
+
+# Graceful shutdown signal
+STOPSIGNAL SIGINT
+
+# Run as non-root user
+USER "${APP_USER}"
+
+# Entrypoint and default command
+ENTRYPOINT ["./myapp"]
+CMD ["--serve", "--config", "/app/config.toml"]
