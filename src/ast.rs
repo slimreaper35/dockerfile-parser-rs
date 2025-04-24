@@ -178,7 +178,12 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("security", security),
                 ];
                 let options_string = helpers::format_options_string(options);
-                write!(f, "RUN {}{:?}", options_string, command)
+                let prefix = if options_string.is_empty() {
+                    String::new()
+                } else {
+                    format!("{} ", options_string)
+                };
+                write!(f, "RUN {}{:?}", prefix, command)
             }
             Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
             Instruction::User { user, group } => {

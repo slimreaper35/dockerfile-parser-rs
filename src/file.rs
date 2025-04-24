@@ -61,7 +61,7 @@ impl Dockerfile {
     ///
     /// fn main() -> ParseResult<()> {
     ///     let dockerfile = Dockerfile::from(PathBuf::from("./Dockerfile"))?;
-    ///     println!("{:?}", dockerfile.instructions);
+    ///     println!("{:#?}", dockerfile.instructions);
     ///     Ok(())
     /// }
     /// ```
@@ -89,7 +89,7 @@ impl Dockerfile {
     /// fn main() -> ParseResult<()> {
     ///     let dockerfile = Dockerfile::empty(PathBuf::from("./Dockerfile"));
     ///     let instructions = dockerfile.parse()?;
-    ///     println!("{:?}", instructions);
+    ///     println!("{:#?}", instructions);
     ///     Ok(())
     /// }
     /// ```

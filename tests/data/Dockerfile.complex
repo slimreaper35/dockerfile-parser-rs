@@ -1,0 +1,7 @@
+FROM docker.io/library/ubuntu:latest AS base
+
+LABEL maintainer="John Doe"
+
+RUN ["echo", "Hello,", "World!"]
+
+ENTRYPOINT ["/bin/bash", "-c"]

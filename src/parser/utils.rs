@@ -16,13 +16,22 @@ pub fn is_exec_form(arguments: &[String]) -> bool {
     )
 }
 
+pub fn clean_shell_form(arguments: Vec<String>) -> Vec<String> {
+    arguments
+        .iter()
+        .map(|arg| arg.replace(DOUBLE_QUOTE, EMPTY))
+        .filter(|arg| !arg.is_empty())
+        .collect()
+}
+
 pub fn clean_exec_form(arguments: Vec<String>) -> Vec<String> {
     arguments
         .iter()
         .map(|arg| {
             arg.trim_start_matches(LEFT_BRACKET)
                 .trim_end_matches(RIGHT_BRACKET)
-                .replace([DOUBLE_QUOTE, COMMA], EMPTY)
+                .trim_end_matches(COMMA)
+                .replace(DOUBLE_QUOTE, EMPTY)
         })
         .filter(|arg| !arg.is_empty())
         .collect()
