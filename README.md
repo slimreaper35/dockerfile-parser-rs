@@ -4,6 +4,8 @@
 
 The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 
+**If you find it useful, please consider giving it a star on GitHub. Thank you so much!**
+
 ## Instructions
 
 - ADD
