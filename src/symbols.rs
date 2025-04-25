@@ -7,7 +7,6 @@ pub mod chars {
     pub const HASHTAG: char = '#';
     pub const LEFT_BRACKET: char = '[';
     pub const RIGHT_BRACKET: char = ']';
-    pub const SLASH: char = '/';
     pub const SPACE: char = ' ';
 }
 

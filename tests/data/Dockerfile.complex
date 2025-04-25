@@ -62,9 +62,8 @@ SHELL ["sh", "-c"]
 # Persist data and logs
 VOLUME ["/app/data", "/app/logs"]
 
-# Expose application ports separately
-EXPOSE 8080/tcp
-EXPOSE 8080/udp
+# Expose application ports
+EXPOSE 8080/tcp 8080/udp
 
 # Graceful shutdown signal
 STOPSIGNAL SIGINT

@@ -3,17 +3,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use strum_macros::Display;
-use strum_macros::EnumString;
-
-#[derive(Debug, Display, EnumString)]
-#[strum(serialize_all = "lowercase")]
-/// This enum represents available protocols for the EXPOSE instruction in a Dockerfile.
-pub enum Protocol {
-    Tcp,
-    Udp,
-}
-
 #[derive(Debug)]
 /// This enum represents available instructions in a Dockerfile.
 pub enum Instruction {
@@ -38,8 +27,7 @@ pub enum Instruction {
     ENTRYPOINT(Vec<String>),
     ENV(BTreeMap<String, String>),
     EXPOSE {
-        port: String,
-        protocol: Option<Protocol>,
+        ports: Vec<String>,
     },
     FROM {
         platform: Option<String>,
@@ -140,13 +128,7 @@ impl fmt::Display for Instruction {
             Instruction::ENV(env) => {
                 write!(f, "ENV {}", helpers::format_btree_map(env))
             }
-            Instruction::EXPOSE { port, protocol } => {
-                if let Some(protocol) = protocol {
-                    write!(f, "EXPOSE {}/{}", port, protocol)
-                } else {
-                    write!(f, "EXPOSE {}", port)
-                }
-            }
+            Instruction::EXPOSE { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
             Instruction::FROM {
                 platform,
                 image,
@@ -313,11 +295,10 @@ mod tests {
     #[test]
     fn test_display_instruction_expose() {
         let instruction = Instruction::EXPOSE {
-            port: String::from("8080"),
-            protocol: Some(Protocol::Udp),
+            ports: vec![String::from("80"), String::from("443")],
         };
 
-        let expected = "EXPOSE 8080/udp";
+        let expected = "EXPOSE 80 443";
         assert_eq!(format!("{}", instruction), expected);
     }
 
