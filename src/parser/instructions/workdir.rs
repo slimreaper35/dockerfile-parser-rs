@@ -6,5 +6,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     }
 
     let path = arguments.first().unwrap().to_owned();
-    Ok(Instruction::Workdir { path })
+    Ok(Instruction::WORKDIR { path })
 }

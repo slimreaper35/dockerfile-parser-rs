@@ -16,7 +16,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         None => (port, None),
     };
 
-    Ok(Instruction::Expose { port, protocol })
+    Ok(Instruction::EXPOSE { port, protocol })
 }
 
 fn parse_protocol(s: &str) -> anyhow::Result<Protocol> {

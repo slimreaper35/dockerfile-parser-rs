@@ -17,7 +17,7 @@ pub enum Protocol {
 #[derive(Debug)]
 /// This enum represents available instructions in a Dockerfile.
 pub enum Instruction {
-    Add {
+    ADD {
         checksum: Option<String>,
         chown: Option<String>,
         chmod: Option<String>,
@@ -25,9 +25,9 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    Arg(BTreeMap<String, Option<String>>),
-    Cmd(Vec<String>),
-    Copy {
+    ARG(BTreeMap<String, Option<String>>),
+    CMD(Vec<String>),
+    COPY {
         from: Option<String>,
         chown: Option<String>,
         chmod: Option<String>,
@@ -35,49 +35,49 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    Entrypoint(Vec<String>),
-    Env(BTreeMap<String, String>),
-    Expose {
+    ENTRYPOINT(Vec<String>),
+    ENV(BTreeMap<String, String>),
+    EXPOSE {
         port: String,
         protocol: Option<Protocol>,
     },
-    From {
+    FROM {
         platform: Option<String>,
         image: String,
         alias: Option<String>,
     },
-    Label(BTreeMap<String, String>),
-    Run {
+    LABEL(BTreeMap<String, String>),
+    RUN {
         mount: Option<String>,
         network: Option<String>,
         security: Option<String>,
         command: Vec<String>,
     },
-    Shell(Vec<String>),
-    Stopsignal {
+    SHELL(Vec<String>),
+    STOPSIGNAL {
         signal: String,
     },
-    User {
+    USER {
         user: String,
         group: Option<String>,
     },
-    Volume {
+    VOLUME {
         mounts: Vec<String>,
     },
-    Workdir {
+    WORKDIR {
         path: String,
     },
     //-------------//
-    //    Extra    //
+    //    extra    //
     //-------------//
-    Comment(String),
-    Empty,
+    COMMENT(String),
+    EMPTY,
 }
 
 impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Instruction::Add {
+            Instruction::ADD {
                 checksum,
                 chown,
                 chmod,
@@ -99,7 +99,7 @@ impl fmt::Display for Instruction {
                 };
                 write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
-            Instruction::Arg(args) => {
+            Instruction::ARG(args) => {
                 let arg_string = args
                     .iter()
                     .map(|(key, value)| {
@@ -113,8 +113,8 @@ impl fmt::Display for Instruction {
                     .join(" ");
                 write!(f, "ARG {}", arg_string)
             }
-            Instruction::Cmd(cmd) => write!(f, "CMD {:?}", cmd),
-            Instruction::Copy {
+            Instruction::CMD(cmd) => write!(f, "CMD {:?}", cmd),
+            Instruction::COPY {
                 from,
                 chown,
                 chmod,
@@ -136,18 +136,18 @@ impl fmt::Display for Instruction {
                 };
                 write!(f, "COPY {}{} {}", prefix, sources.join(" "), destination)
             }
-            Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
-            Instruction::Env(env) => {
+            Instruction::ENTRYPOINT(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
+            Instruction::ENV(env) => {
                 write!(f, "ENV {}", helpers::format_btree_map(env))
             }
-            Instruction::Expose { port, protocol } => {
+            Instruction::EXPOSE { port, protocol } => {
                 if let Some(protocol) = protocol {
                     write!(f, "EXPOSE {}/{}", port, protocol)
                 } else {
                     write!(f, "EXPOSE {}", port)
                 }
             }
-            Instruction::From {
+            Instruction::FROM {
                 platform,
                 image,
                 alias,
@@ -166,10 +166,10 @@ impl fmt::Display for Instruction {
                 }
                 write!(f, "{}", line)
             }
-            Instruction::Label(labels) => {
+            Instruction::LABEL(labels) => {
                 write!(f, "LABEL {}", helpers::format_btree_map(labels))
             }
-            Instruction::Run {
+            Instruction::RUN {
                 mount,
                 network,
                 security,
@@ -188,22 +188,22 @@ impl fmt::Display for Instruction {
                 };
                 write!(f, "RUN {}{:?}", prefix, command)
             }
-            Instruction::Shell(shell) => write!(f, "SHELL {:?}", shell),
-            Instruction::Stopsignal { signal } => write!(f, "STOPSIGNAL {}", signal),
-            Instruction::User { user, group } => {
+            Instruction::SHELL(shell) => write!(f, "SHELL {:?}", shell),
+            Instruction::STOPSIGNAL { signal } => write!(f, "STOPSIGNAL {}", signal),
+            Instruction::USER { user, group } => {
                 if let Some(group) = group {
                     write!(f, "USER {}:{}", user, group)
                 } else {
                     write!(f, "USER {}", user)
                 }
             }
-            Instruction::Volume { mounts } => write!(f, "VOLUME {:?}", mounts),
-            Instruction::Workdir { path } => write!(f, "WORKDIR {}", path),
+            Instruction::VOLUME { mounts } => write!(f, "VOLUME {:?}", mounts),
+            Instruction::WORKDIR { path } => write!(f, "WORKDIR {}", path),
             //-------------//
-            //    Extra    //
+            //    extra    //
             //-------------//
-            Instruction::Comment(comment) => write!(f, "{}", comment),
-            Instruction::Empty => write!(f, ""),
+            Instruction::COMMENT(comment) => write!(f, "{}", comment),
+            Instruction::EMPTY => write!(f, ""),
         }
     }
 }
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_add() {
-        let instruction = Instruction::Add {
+        let instruction = Instruction::ADD {
             checksum: None,
             chown: None,
             chmod: None,
@@ -256,7 +256,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_arg() {
-        let instruction = Instruction::Arg(BTreeMap::from([
+        let instruction = Instruction::ARG(BTreeMap::from([
             (String::from("ARG2"), None),
             (String::from("ARG1"), Some(String::from("value1"))),
         ]));
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn test_display_instruction_cmd() {
         let instruction =
-            Instruction::Cmd(vec![String::from("echo"), String::from("Hello, World!")]);
+            Instruction::CMD(vec![String::from("echo"), String::from("Hello, World!")]);
 
         let expected = "CMD [\"echo\", \"Hello, World!\"]";
         assert_eq!(format!("{}", instruction), expected);
@@ -277,7 +277,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_copy() {
-        let instruction = Instruction::Copy {
+        let instruction = Instruction::COPY {
             from: Some(String::from("builder")),
             chown: None,
             chmod: None,
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_entrypoint() {
-        let instruction = Instruction::Entrypoint(vec![String::from("entrypoint.sh")]);
+        let instruction = Instruction::ENTRYPOINT(vec![String::from("entrypoint.sh")]);
 
         let expected = "ENTRYPOINT [\"entrypoint.sh\"]";
         assert_eq!(format!("{}", instruction), expected);
@@ -300,7 +300,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_env() {
-        let instruction = Instruction::Env(BTreeMap::from([
+        let instruction = Instruction::ENV(BTreeMap::from([
             (String::from("ENV2"), String::from("value2")),
             (String::from("ENV1"), String::from("value1")),
         ]));
@@ -312,7 +312,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_expose() {
-        let instruction = Instruction::Expose {
+        let instruction = Instruction::EXPOSE {
             port: String::from("8080"),
             protocol: Some(Protocol::Udp),
         };
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_from() {
-        let instruction = Instruction::From {
+        let instruction = Instruction::FROM {
             platform: Some(String::from("linux/amd64")),
             image: String::from("docker.io/library/fedora:latest"),
             alias: Some(String::from("builder")),
@@ -335,7 +335,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_label() {
-        let instruction = Instruction::Label(BTreeMap::from([
+        let instruction = Instruction::LABEL(BTreeMap::from([
             (String::from("version"), String::from("1.0")),
             (String::from("maintainer"), String::from("John Doe")),
         ]));
@@ -347,7 +347,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_run() {
-        let instruction = Instruction::Run {
+        let instruction = Instruction::RUN {
             mount: None,
             network: None,
             security: None,
@@ -360,7 +360,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_shell() {
-        let instruction = Instruction::Shell(vec![String::from("/bin/sh"), String::from("-c")]);
+        let instruction = Instruction::SHELL(vec![String::from("/bin/sh"), String::from("-c")]);
 
         let expected = "SHELL [\"/bin/sh\", \"-c\"]";
         assert_eq!(format!("{}", instruction), expected);
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_user() {
-        let instruction = Instruction::User {
+        let instruction = Instruction::USER {
             user: String::from("root"),
             group: Some(String::from("root")),
         };
@@ -379,7 +379,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_volume() {
-        let instruction = Instruction::Volume {
+        let instruction = Instruction::VOLUME {
             mounts: vec![String::from("/data"), String::from("/var/log")],
         };
 
@@ -389,7 +389,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_workdir() {
-        let instruction = Instruction::Workdir {
+        let instruction = Instruction::WORKDIR {
             path: String::from("/app"),
         };
 
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_comment() {
-        let instruction = Instruction::Comment(String::from("# This is a comment"));
+        let instruction = Instruction::COMMENT(String::from("# This is a comment"));
 
         let expected = "# This is a comment";
         assert_eq!(format!("{}", instruction), expected);
@@ -407,7 +407,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_empty() {
-        let instruction = Instruction::Empty;
+        let instruction = Instruction::EMPTY;
 
         let expected = "";
         assert_eq!(format!("{}", instruction), expected);

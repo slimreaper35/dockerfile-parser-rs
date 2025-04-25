@@ -16,7 +16,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     let mut sources: Vec<String> = remaining;
     let destination = sources.pop().unwrap();
 
-    Ok(Instruction::Copy {
+    Ok(Instruction::COPY {
         from,
         chown,
         chmod,

@@ -21,6 +21,7 @@ fn test_dockerfile_parse_and_dump() {
     let dumped_content =
         std::fs::read_to_string(PathBuf::from("tests/data/Dockerfile.tmp")).unwrap();
 
+    // clean up
     std::fs::remove_file(PathBuf::from("tests/data/Dockerfile.tmp")).unwrap();
     assert_eq!(original_content, dumped_content);
 }

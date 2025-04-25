@@ -8,5 +8,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     }
 
     let shell = clean_exec_form(arguments);
-    Ok(Instruction::Shell(shell))
+    Ok(Instruction::SHELL(shell))
 }

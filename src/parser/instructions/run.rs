@@ -21,7 +21,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         clean_shell_form(remaining)
     };
 
-    Ok(Instruction::Run {
+    Ok(Instruction::RUN {
         mount,
         network,
         security,

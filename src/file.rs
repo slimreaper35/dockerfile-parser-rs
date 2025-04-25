@@ -104,10 +104,10 @@ impl Dockerfile {
         for line in lines {
             // preserve empty lines
             if line.is_empty() {
-                instructions.push(Instruction::Empty);
+                instructions.push(Instruction::EMPTY);
             // preserve comments
             } else if line.starts_with(HASHTAG) {
-                instructions.push(Instruction::Comment(line.to_owned()));
+                instructions.push(Instruction::COMMENT(line.to_owned()));
             } else {
                 let (instruction, arguments) = split_instruction_and_arguments(&line)?;
                 let instruction = match instruction.as_str() {

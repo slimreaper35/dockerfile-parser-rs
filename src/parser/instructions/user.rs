@@ -13,5 +13,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         None => (user, None),
     };
 
-    Ok(Instruction::User { user, group })
+    Ok(Instruction::USER { user, group })
 }
