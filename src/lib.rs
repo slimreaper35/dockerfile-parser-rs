@@ -10,7 +10,5 @@ mod utils;
 pub type ParseResult<T> = Result<T, ParseError>;
 
 pub use crate::ast::Instruction;
-
 pub use crate::error::ParseError;
-
 pub use crate::file::Dockerfile;

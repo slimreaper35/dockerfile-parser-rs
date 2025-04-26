@@ -79,12 +79,7 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("chmod", chmod),
                     helpers::format_instruction_option("link", link),
                 ];
-                let options_string = helpers::format_options_string(options);
-                let prefix = if options_string.is_empty() {
-                    String::new()
-                } else {
-                    format!("{} ", options_string)
-                };
+                let prefix = helpers::format_options_string(&options);
                 write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
             Instruction::ARG(args) => {
@@ -116,12 +111,7 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("chmod", chmod),
                     helpers::format_instruction_option("link", link),
                 ];
-                let options_string = helpers::format_options_string(options);
-                let prefix = if options_string.is_empty() {
-                    String::new()
-                } else {
-                    format!("{} ", options_string)
-                };
+                let prefix = helpers::format_options_string(&options);
                 write!(f, "COPY {}{} {}", prefix, sources.join(" "), destination)
             }
             Instruction::ENTRYPOINT(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
@@ -135,17 +125,13 @@ impl fmt::Display for Instruction {
                 alias,
             } => {
                 let options = vec![helpers::format_instruction_option("platform", platform)];
-                let options_string = helpers::format_options_string(options);
-                let prefix = if options_string.is_empty() {
-                    String::new()
-                } else {
-                    format!("{} ", options_string)
-                };
-                let mut line = format!("FROM {}{}", prefix, image);
+                let prefix = helpers::format_options_string(&options);
 
+                let mut line = format!("FROM {}{}", prefix, image);
                 if let Some(alias) = alias {
-                    line.push_str(&format!(" AS {}", alias));
+                    line.push_str(format!(" AS {}", alias).as_str());
                 }
+
                 write!(f, "{}", line)
             }
             Instruction::LABEL(labels) => {
@@ -162,12 +148,7 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("network", network),
                     helpers::format_instruction_option("security", security),
                 ];
-                let options_string = helpers::format_options_string(options);
-                let prefix = if options_string.is_empty() {
-                    String::new()
-                } else {
-                    format!("{} ", options_string)
-                };
+                let prefix = helpers::format_options_string(&options);
                 write!(f, "RUN {}{:?}", prefix, command)
             }
             Instruction::SHELL(shell) => write!(f, "SHELL {:?}", shell),
@@ -200,12 +181,19 @@ mod helpers {
             .unwrap_or_default()
     }
 
-    pub fn format_options_string(options: Vec<String>) -> String {
-        options
-            .into_iter()
+    pub fn format_options_string(options: &[String]) -> String {
+        let result = options
+            .iter()
             .filter(|s| !s.is_empty())
+            .cloned()
             .collect::<Vec<String>>()
-            .join(" ")
+            .join(" ");
+
+        if result.is_empty() {
+            String::new()
+        } else {
+            format!("{} ", result)
+        }
     }
 
     pub fn format_btree_map(pairs: &BTreeMap<String, String>) -> String {

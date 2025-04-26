@@ -35,7 +35,6 @@ impl Dockerfile {
     /// Creates a new `Dockerfile` instance for the given path and instructions.
     ///
     /// The actual file does not need to exist at this point.
-    ///
     pub fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
         Dockerfile { path, instructions }
     }
@@ -43,7 +42,6 @@ impl Dockerfile {
     /// Creates an empty `Dockerfile` instance for the given path.
     ///
     /// The actual file does not need to exist at this point.
-    ///
     pub fn empty(path: PathBuf) -> Self {
         Dockerfile::new(path, Vec::new())
     }
@@ -66,7 +64,6 @@ impl Dockerfile {
     ///     Ok(())
     /// }
     /// ```
-    ///
     pub fn from(path: PathBuf) -> ParseResult<Self> {
         let mut dockerfile = Dockerfile::empty(path);
         dockerfile.instructions = dockerfile.parse()?;
@@ -94,7 +91,6 @@ impl Dockerfile {
     ///     Ok(())
     /// }
     /// ```
-    ///
     pub fn parse(&self) -> ParseResult<Vec<Instruction>> {
         let file = File::open(&self.path).map_err(|e| ParseError::FileError(e.to_string()))?;
         let lines = read_lines(&file);
@@ -143,7 +139,6 @@ impl Dockerfile {
     ///
     /// If the file does not exist, it will be created.
     /// If the file exists, it will be overwritten.
-    ///
     pub fn dump(&self) -> std::io::Result<()> {
         let mut file = File::create(&self.path)?;
         for instruction in &self.instructions {

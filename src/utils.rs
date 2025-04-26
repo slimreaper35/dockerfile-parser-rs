@@ -59,6 +59,10 @@ pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<S
         .ok_or_else(|| ParseError::SyntaxError(line.to_owned()))?
         .as_str();
 
+    // double check
+    assert!(!instruction.is_empty());
+    assert!(!arguments.is_empty());
+
     Ok((
         instruction.to_owned(),
         arguments.split_whitespace().map(String::from).collect(),
