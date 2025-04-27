@@ -73,7 +73,7 @@ pub fn process_key_value_pairs(arguments: &[String]) -> BTreeMap<String, String>
                 let last_key = last_key.unwrap();
                 let last_value = result.get(&last_key).unwrap();
 
-                let new_value = format!("{} {}", last_value, arg);
+                let new_value = format!("{last_value} {arg}");
 
                 (last_key, new_value)
             }

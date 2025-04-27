@@ -127,7 +127,7 @@ impl Dockerfile {
                 match instruction {
                     Ok(instruction) => instructions.push(instruction),
                     Err(e) => {
-                        return Err(ParseError::SyntaxError(format!("{}: {}", line, e)));
+                        return Err(ParseError::SyntaxError(format!("{line}: {e}")));
                     }
                 }
             }
@@ -142,7 +142,7 @@ impl Dockerfile {
     pub fn dump(&self) -> std::io::Result<()> {
         let mut file = File::create(&self.path)?;
         for instruction in &self.instructions {
-            writeln!(file, "{}", instruction)?;
+            writeln!(file, "{instruction}")?;
         }
         Ok(())
     }

@@ -79,6 +79,7 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("chmod", chmod),
                     helpers::format_instruction_option("link", link),
                 ];
+
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
@@ -87,16 +88,17 @@ impl fmt::Display for Instruction {
                     .iter()
                     .map(|(key, value)| {
                         if let Some(default) = value {
-                            format!("{}={}", key, default)
+                            format!("{key}={default}")
                         } else {
                             key.to_owned()
                         }
                     })
                     .collect::<Vec<String>>()
                     .join(" ");
-                write!(f, "ARG {}", arg_string)
+
+                write!(f, "ARG {arg_string}")
             }
-            Instruction::CMD(cmd) => write!(f, "CMD {:?}", cmd),
+            Instruction::CMD(cmd) => write!(f, "CMD {cmd:?}"),
             Instruction::COPY {
                 from,
                 chown,
@@ -111,10 +113,11 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("chmod", chmod),
                     helpers::format_instruction_option("link", link),
                 ];
+
                 let prefix = helpers::format_options_string(&options);
-                write!(f, "COPY {}{} {}", prefix, sources.join(" "), destination)
+                write!(f, "COPY {prefix}{} {destination}", sources.join(" "))
             }
-            Instruction::ENTRYPOINT(entrypoint) => write!(f, "ENTRYPOINT {:?}", entrypoint),
+            Instruction::ENTRYPOINT(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
             Instruction::ENV(env) => {
                 write!(f, "ENV {}", helpers::format_btree_map(env))
             }
@@ -127,12 +130,13 @@ impl fmt::Display for Instruction {
                 let options = vec![helpers::format_instruction_option("platform", platform)];
                 let prefix = helpers::format_options_string(&options);
 
-                let mut line = format!("FROM {}{}", prefix, image);
+                let mut line = format!("FROM {prefix}{image}");
                 if let Some(alias) = alias {
-                    line.push_str(format!(" AS {}", alias).as_str());
+                    line.push_str(" AS ");
+                    line.push_str(alias);
                 }
 
-                write!(f, "{}", line)
+                write!(f, "{line}")
             }
             Instruction::LABEL(labels) => {
                 write!(f, "LABEL {}", helpers::format_btree_map(labels))
@@ -148,24 +152,25 @@ impl fmt::Display for Instruction {
                     helpers::format_instruction_option("network", network),
                     helpers::format_instruction_option("security", security),
                 ];
+
                 let prefix = helpers::format_options_string(&options);
-                write!(f, "RUN {}{:?}", prefix, command)
+                write!(f, "RUN {prefix}{command:?}")
             }
-            Instruction::SHELL(shell) => write!(f, "SHELL {:?}", shell),
-            Instruction::STOPSIGNAL { signal } => write!(f, "STOPSIGNAL {}", signal),
+            Instruction::SHELL(shell) => write!(f, "SHELL {shell:?}"),
+            Instruction::STOPSIGNAL { signal } => write!(f, "STOPSIGNAL {signal}"),
             Instruction::USER { user, group } => {
                 if let Some(group) = group {
-                    write!(f, "USER {}:{}", user, group)
+                    write!(f, "USER {user}:{group}")
                 } else {
-                    write!(f, "USER {}", user)
+                    write!(f, "USER {user}")
                 }
             }
-            Instruction::VOLUME { mounts } => write!(f, "VOLUME {:?}", mounts),
-            Instruction::WORKDIR { path } => write!(f, "WORKDIR {}", path),
+            Instruction::VOLUME { mounts } => write!(f, "VOLUME {mounts:?}"),
+            Instruction::WORKDIR { path } => write!(f, "WORKDIR {path}"),
             //-------------//
             //    extra    //
             //-------------//
-            Instruction::COMMENT(comment) => write!(f, "{}", comment),
+            Instruction::COMMENT(comment) => write!(f, "{comment}"),
             Instruction::EMPTY => write!(f, ""),
         }
     }
@@ -174,10 +179,14 @@ impl fmt::Display for Instruction {
 mod helpers {
     use super::*;
 
+    pub fn enquote(s: &str) -> String {
+        format!("\"{s}\"")
+    }
+
     pub fn format_instruction_option(key: &str, value: &Option<String>) -> String {
         value
             .as_ref()
-            .map(|v| format!("--{}={}", key, v))
+            .map(|v| format!("--{key}={v}"))
             .unwrap_or_default()
     }
 
@@ -192,14 +201,15 @@ mod helpers {
         if result.is_empty() {
             String::new()
         } else {
-            format!("{} ", result)
+            // add a space to separate options
+            format!("{result} ")
         }
     }
 
     pub fn format_btree_map(pairs: &BTreeMap<String, String>) -> String {
         pairs
             .iter()
-            .map(|(key, value)| format!("{}=\"{}\"", key, value))
+            .map(|(key, value)| format!("{key}={}", enquote(value)))
             .collect::<Vec<String>>()
             .join(" ")
     }
@@ -221,7 +231,7 @@ mod tests {
         };
 
         let expected = "ADD source1 source2 /destination";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -233,7 +243,7 @@ mod tests {
 
         // must be sorted
         let expected = "ARG ARG1=value1 ARG2";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -242,7 +252,7 @@ mod tests {
             Instruction::CMD(vec![String::from("echo"), String::from("Hello, World!")]);
 
         let expected = "CMD [\"echo\", \"Hello, World!\"]";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -257,7 +267,7 @@ mod tests {
         };
 
         let expected = "COPY --from=builder source1 source2 /destination";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -265,7 +275,7 @@ mod tests {
         let instruction = Instruction::ENTRYPOINT(vec![String::from("entrypoint.sh")]);
 
         let expected = "ENTRYPOINT [\"entrypoint.sh\"]";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -277,7 +287,7 @@ mod tests {
 
         // must be sorted
         let expected = "ENV ENV1=\"value1\" ENV2=\"value2\"";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -287,7 +297,7 @@ mod tests {
         };
 
         let expected = "EXPOSE 80 443";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -299,7 +309,7 @@ mod tests {
         };
 
         let expected = "FROM --platform=linux/amd64 docker.io/library/fedora:latest AS builder";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -311,7 +321,7 @@ mod tests {
 
         // must be sorted
         let expected = "LABEL maintainer=\"John Doe\" version=\"1.0\"";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -324,7 +334,7 @@ mod tests {
         };
 
         let expected = "RUN [\"echo\", \"Hello, World!\"]";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -332,7 +342,7 @@ mod tests {
         let instruction = Instruction::SHELL(vec![String::from("/bin/sh"), String::from("-c")]);
 
         let expected = "SHELL [\"/bin/sh\", \"-c\"]";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -343,7 +353,7 @@ mod tests {
         };
 
         let expected = "USER root:root";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -353,7 +363,7 @@ mod tests {
         };
 
         let expected = "VOLUME [\"/data\", \"/var/log\"]";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -363,7 +373,7 @@ mod tests {
         };
 
         let expected = "WORKDIR /app";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -371,7 +381,7 @@ mod tests {
         let instruction = Instruction::COMMENT(String::from("# This is a comment"));
 
         let expected = "# This is a comment";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 
     #[test]
@@ -379,6 +389,6 @@ mod tests {
         let instruction = Instruction::EMPTY;
 
         let expected = "";
-        assert_eq!(format!("{}", instruction), expected);
+        assert_eq!(instruction.to_string(), expected);
     }
 }
