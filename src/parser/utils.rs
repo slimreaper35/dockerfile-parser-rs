@@ -79,11 +79,13 @@ pub fn process_key_value_pairs(arguments: &[String]) -> BTreeMap<String, String>
             }
         };
 
-        let value = value
-            .trim_start_matches(DOUBLE_QUOTE)
-            .trim_end_matches(DOUBLE_QUOTE);
-
-        result.insert(key.to_owned(), value.to_owned());
+        result.insert(
+            key.to_owned(),
+            value
+                .trim_start_matches(DOUBLE_QUOTE)
+                .trim_end_matches(DOUBLE_QUOTE)
+                .to_owned(),
+        );
         last_key = Some(key);
     }
 
