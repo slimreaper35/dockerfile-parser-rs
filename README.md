@@ -88,3 +88,7 @@ instructions when they have multiple key-value pairs defined on one line.
 The instructions are not case-sensitive. However, the library works only with uppercase instructions
 for simplicity and consistency. Using uppercase instructions is also recommended convention in
 [Dockerfile](https://docs.docker.com/reference/dockerfile/#format) format documentation.
+
+### Heredocs
+
+Heredoc syntax is not supported yet.
