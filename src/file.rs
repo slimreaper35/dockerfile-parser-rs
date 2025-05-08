@@ -146,4 +146,25 @@ impl Dockerfile {
         }
         Ok(())
     }
+
+    /// Returns number of instructions in the Dockerfile.
+    pub fn steps(&self) -> usize {
+        self.instructions
+            .iter()
+            .filter(|i| !matches!(i, Instruction::EMPTY | Instruction::COMMENT { .. }))
+            .count()
+    }
+
+    /// Returns number of layers in the Dockerfile.
+    pub fn layers(&self) -> usize {
+        self.instructions
+            .iter()
+            .filter(|i| {
+                matches!(
+                    i,
+                    Instruction::ADD { .. } | Instruction::COPY { .. } | Instruction::RUN { .. }
+                )
+            })
+            .count()
+    }
 }
