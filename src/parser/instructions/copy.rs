@@ -11,7 +11,11 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     let from = options_map.get("from").cloned();
     let chown = options_map.get("chown").cloned();
     let chmod = options_map.get("chmod").cloned();
-    let link = options_map.get("link").cloned();
+    let mut link = options_map.get("link").cloned();
+
+    if link.is_some() && link.clone().unwrap().is_empty() {
+        link = Some(String::from("true"));
+    }
 
     let mut sources: Vec<String> = remaining;
     let destination = sources.pop().unwrap();

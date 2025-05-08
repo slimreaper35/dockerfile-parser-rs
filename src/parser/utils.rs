@@ -44,9 +44,17 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
 
     for arg in &arguments {
         if let Some(stripped) = arg.strip_prefix(HYPHEN_MINUS) {
-            if let Some((key, value)) = stripped.split_once(EQUALS) {
-                options.insert(key.to_owned(), value.to_owned());
-                continue;
+            match stripped.split_once(EQUALS) {
+                Some((key, value)) => {
+                    options.insert(key.to_owned(), value.to_owned());
+                    continue;
+                }
+                // some options have default values
+                // https://docs.docker.com/reference/dockerfile/#copy---link
+                None => {
+                    options.insert(stripped.to_owned(), EMPTY.to_owned());
+                    continue;
+                }
             }
         }
         break;
@@ -239,7 +247,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_options_from_flags() {
+    fn test_get_options_from_no_equals() {
         let arguments = vec![
             String::from("--option1"),
             String::from("--option2"),
@@ -248,9 +256,9 @@ mod tests {
         ];
         let (options, remaining) = get_options_from(arguments);
 
-        assert_eq!(options.get("option1"), None);
-        assert_eq!(options.get("option2"), None);
-        assert_eq!(remaining, vec!["--option1", "--option2", "arg1", "arg2"]);
+        assert_eq!(options.get("option1"), Some(String::from("")).as_ref());
+        assert_eq!(options.get("option2"), Some(String::from("")).as_ref());
+        assert_eq!(remaining, vec!["arg1", "arg2"]);
     }
 
     #[test]
