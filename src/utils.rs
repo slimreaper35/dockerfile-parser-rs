@@ -10,18 +10,41 @@ use crate::error::ParseError;
 use crate::symbols::chars::BACKSLASH;
 use crate::symbols::chars::HASHTAG;
 use crate::symbols::chars::SPACE;
+use crate::symbols::strings::HEREDOC_END;
+use crate::symbols::strings::HEREDOC_NEWLINE;
+use crate::symbols::strings::HEREDOC_START;
 
 pub fn read_lines(file: &File) -> Vec<String> {
     let reader = BufReader::new(file);
 
     let mut lines = Vec::new();
     let mut current = String::new();
+    let mut in_heredoc = false;
 
     for line in reader.lines().map_while(Result::ok) {
-        let trimmed = line.trim();
+        let trimmed = line.trim_end();
 
         // skip inline comments
         if trimmed.starts_with(HASHTAG) && !current.is_empty() {
+            continue;
+        }
+
+        if trimmed.contains(HEREDOC_START) {
+            in_heredoc = true;
+            current.push_str(trimmed);
+            add_heredoc_newline(&mut current);
+            continue;
+        }
+
+        if in_heredoc {
+            current.push_str(trimmed);
+            if trimmed == HEREDOC_END {
+                lines.push(current);
+                current = String::new();
+                in_heredoc = false;
+            } else {
+                add_heredoc_newline(&mut current);
+            }
             continue;
         }
 
@@ -37,6 +60,34 @@ pub fn read_lines(file: &File) -> Vec<String> {
         }
     }
     lines
+}
+
+pub fn split_heredoc(strings: Vec<String>) -> Vec<Vec<String>> {
+    let mut result: Vec<Vec<String>> = Vec::new();
+    let mut current_sub_vector: Vec<String> = Vec::new();
+
+    for s in strings {
+        if s == HEREDOC_NEWLINE {
+            if !current_sub_vector.is_empty() {
+                result.push(current_sub_vector);
+            }
+            current_sub_vector = Vec::new();
+        } else {
+            current_sub_vector.push(s);
+        }
+    }
+
+    if !current_sub_vector.is_empty() {
+        result.push(current_sub_vector);
+    }
+
+    result
+}
+
+fn add_heredoc_newline(string: &mut String) {
+    string.push(SPACE);
+    string.push_str(HEREDOC_NEWLINE);
+    string.push(SPACE);
 }
 
 pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<String>)> {
@@ -65,7 +116,8 @@ pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<S
 
     Ok((
         instruction.to_owned(),
-        arguments.split_whitespace().map(String::from).collect(),
+        // preserve tabs inside heredocs
+        arguments.split(SPACE).map(String::from).collect(),
     ))
 }
 

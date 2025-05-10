@@ -91,4 +91,6 @@ for simplicity and consistency. Using uppercase instructions is also recommended
 
 ### Heredocs
 
-Heredoc syntax is not supported yet.
+Heredoc syntax is supported only for the `RUN` instruction. When using the heredoc syntax, `EOF` is
+the only valid delimiter to signify the end of the multi-line string. Please ensure that your
+heredocs are always terminated with `EOF` on a new line.

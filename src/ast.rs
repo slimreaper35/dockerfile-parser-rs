@@ -35,11 +35,27 @@ pub enum Instruction {
         alias: Option<String>,
     },
     LABEL(BTreeMap<String, String>),
+    /// # Example
+    ///
+    /// ```
+    /// let run = Instruction::RUN {
+    ///     mount: None,
+    ///     network: None,
+    ///     security: None,
+    ///     command: vec![String::from("<<EOF")],
+    ///     heredoc: Some(vec![
+    ///         String::from("dnf upgrade -y"),
+    ///         String::from("dnf install -y rustup"),
+    ///         String::from("EOF"),
+    ///     ]),
+    /// };
+    /// ```
     RUN {
         mount: Option<String>,
         network: Option<String>,
         security: Option<String>,
         command: Vec<String>,
+        heredoc: Option<Vec<String>>,
     },
     SHELL(Vec<String>),
     STOPSIGNAL {
@@ -146,6 +162,7 @@ impl fmt::Display for Instruction {
                 network,
                 security,
                 command,
+                heredoc,
             } => {
                 let options = vec![
                     helpers::format_instruction_option("mount", mount),
@@ -154,7 +171,17 @@ impl fmt::Display for Instruction {
                 ];
 
                 let prefix = helpers::format_options_string(&options);
-                write!(f, "RUN {prefix}{command:?}")
+
+                if let Some(heredoc) = heredoc {
+                    write!(
+                        f,
+                        "RUN {prefix}{}\n{}",
+                        command.join(" "),
+                        heredoc.join("\n")
+                    )
+                } else {
+                    write!(f, "RUN {prefix}{command:?}")
+                }
             }
             Instruction::SHELL(shell) => write!(f, "SHELL {shell:?}"),
             Instruction::STOPSIGNAL { signal } => write!(f, "STOPSIGNAL {signal}"),
@@ -331,9 +358,49 @@ mod tests {
             network: None,
             security: None,
             command: vec![String::from("echo"), String::from("Hello, World!")],
+            heredoc: None,
         };
 
         let expected = "RUN [\"echo\", \"Hello, World!\"]";
+        assert_eq!(instruction.to_string(), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_run_with_heredoc() {
+        let instruction = Instruction::RUN {
+            mount: None,
+            network: None,
+            security: None,
+            command: vec![String::from("<<EOF")],
+            heredoc: Some(vec![
+                String::from("dnf upgrade -y"),
+                String::from("dnf install -y rustup"),
+                String::from("EOF"),
+            ]),
+        };
+
+        let expected = "RUN <<EOF\ndnf upgrade -y\ndnf install -y rustup\nEOF";
+        assert_eq!(instruction.to_string(), expected);
+    }
+
+    #[test]
+    fn test_display_instruction_run_with_heredoc_and_tabs() {
+        let instruction = Instruction::RUN {
+            mount: None,
+            network: None,
+            security: None,
+            command: vec![String::from("python"), String::from("<<EOF")],
+            heredoc: Some(vec![
+                String::from("def main():"),
+                String::from("\tx = 42"),
+                String::from("\tprint(x)"),
+                String::from(""),
+                String::from("main()"),
+                String::from("EOF"),
+            ]),
+        };
+
+        let expected = "RUN python <<EOF\ndef main():\n\tx = 42\n\tprint(x)\n\nmain()\nEOF";
         assert_eq!(instruction.to_string(), expected);
     }
 

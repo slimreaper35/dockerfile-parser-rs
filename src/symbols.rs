@@ -12,5 +12,8 @@ pub mod chars {
 
 pub mod strings {
     pub const EMPTY: &str = "";
+    pub const HEREDOC_END: &str = "EOF";
+    pub const HEREDOC_NEWLINE: &str = "--NEWLINE--";
+    pub const HEREDOC_START: &str = "<<EOF";
     pub const HYPHEN_MINUS: &str = "--";
 }
