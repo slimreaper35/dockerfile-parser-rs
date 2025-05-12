@@ -167,4 +167,12 @@ impl Dockerfile {
             })
             .count()
     }
+
+    /// Returns number of stages in the Dockerfile.
+    pub fn stages(&self) -> usize {
+        self.instructions
+            .iter()
+            .filter(|i| matches!(i, Instruction::FROM { .. }))
+            .count()
+    }
 }
