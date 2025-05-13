@@ -42,8 +42,12 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
     let mut options = HashMap::new();
     let mut remaining = Vec::new();
 
+    // some options can be passed multiple times
+    let mut options_counter = 0;
+
     for arg in &arguments {
         if let Some(stripped) = arg.strip_prefix(HYPHEN_MINUS) {
+            options_counter += 1;
             match stripped.split_once(EQUALS) {
                 Some((key, value)) => {
                     options.insert(key.to_owned(), value.to_owned());
@@ -60,7 +64,7 @@ pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec
         break;
     }
 
-    remaining.extend(arguments.iter().skip(options.len()).cloned());
+    remaining.extend(arguments.iter().skip(options_counter).cloned());
 
     (options, remaining)
 }

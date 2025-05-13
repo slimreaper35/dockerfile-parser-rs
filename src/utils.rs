@@ -117,7 +117,11 @@ pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<S
     Ok((
         instruction.to_owned(),
         // preserve tabs inside heredocs
-        arguments.split(SPACE).map(String::from).collect(),
+        arguments
+            .split(SPACE)
+            .filter(|s| !s.is_empty())
+            .map(String::from)
+            .collect(),
     ))
 }
 
