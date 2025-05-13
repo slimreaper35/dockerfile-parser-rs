@@ -176,3 +176,63 @@ impl Dockerfile {
             .count()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn mock_dummy_dockerfile() -> Dockerfile {
+        let path = PathBuf::from("./Dockerfile");
+        let instructions = vec![
+            Instruction::FROM {
+                platform: None,
+                image: String::from("docker.io/library/fedora:latest"),
+                alias: Some(String::from("base")),
+            },
+            Instruction::RUN {
+                mount: None,
+                network: None,
+                security: None,
+                command: vec![
+                    String::from("echo"),
+                    String::from("hello"),
+                    String::from("world"),
+                ],
+                heredoc: None,
+            },
+            Instruction::FROM {
+                platform: None,
+                image: String::from("docker.io/library/ubuntu:latest"),
+                alias: Some(String::from("builder")),
+            },
+            Instruction::COPY {
+                from: Some(String::from("base")),
+                chown: None,
+                chmod: None,
+                link: None,
+                sources: vec![String::from("hello.txt")],
+                destination: String::from("/tmp/hello.txt"),
+            },
+            Instruction::ENTRYPOINT(vec![String::from("/bin/bash")]),
+        ];
+        Dockerfile::new(path, instructions)
+    }
+
+    #[test]
+    fn test_dockerfile_steps() {
+        let dockerfile = mock_dummy_dockerfile();
+        assert_eq!(dockerfile.steps(), 5);
+    }
+
+    #[test]
+    fn test_dockerfile_layers() {
+        let dockerfile = mock_dummy_dockerfile();
+        assert_eq!(dockerfile.layers(), 2);
+    }
+
+    #[test]
+    fn test_dockerfile_stages() {
+        let dockerfile = mock_dummy_dockerfile();
+        assert_eq!(dockerfile.stages(), 2);
+    }
+}
