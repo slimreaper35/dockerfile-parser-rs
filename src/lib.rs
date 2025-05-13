@@ -2,6 +2,7 @@ mod ast;
 mod error;
 mod file;
 mod parser;
+mod quoter;
 mod symbols;
 mod utils;
 

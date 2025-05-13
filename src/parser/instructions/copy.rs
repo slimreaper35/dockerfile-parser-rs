@@ -1,5 +1,6 @@
 use crate::ast::Instruction;
 use crate::parser::utils::get_options_from;
+use crate::quoter::Quoter;
 
 pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     let (options_map, remaining) = get_options_from(arguments);
@@ -17,8 +18,8 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         link = Some(String::from("true"));
     }
 
-    let mut sources: Vec<String> = remaining;
-    let destination = sources.pop().unwrap();
+    let mut sources: Vec<String> = remaining.iter().map(|s| s.dequote()).collect();
+    let destination = sources.pop().unwrap().dequote();
 
     Ok(Instruction::COPY {
         from,

@@ -3,6 +3,8 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
+use crate::quoter::Quoter;
+
 #[derive(Debug)]
 /// This enum represents available instructions in a Dockerfile.
 pub enum Instruction {
@@ -206,10 +208,6 @@ impl fmt::Display for Instruction {
 mod helpers {
     use super::*;
 
-    pub fn enquote(s: &str) -> String {
-        format!("\"{s}\"")
-    }
-
     pub fn format_instruction_option(key: &str, value: &Option<String>) -> String {
         value
             .as_ref()
@@ -236,7 +234,7 @@ mod helpers {
     pub fn format_btree_map(pairs: &BTreeMap<String, String>) -> String {
         pairs
             .iter()
-            .map(|(key, value)| format!("{key}={}", enquote(value)))
+            .map(|(key, value)| format!("{key}={}", value.enquote()))
             .collect::<Vec<String>>()
             .join(" ")
     }
