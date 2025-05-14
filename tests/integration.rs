@@ -2,7 +2,6 @@ use std::io::Write;
 
 use dockerfile_parser_rs::Dockerfile;
 use dockerfile_parser_rs::ParseError;
-use tempfile::NamedTempFile;
 
 #[test]
 fn test_parse() {
@@ -15,7 +14,7 @@ fn test_parse_and_dump() {
     let path = std::path::PathBuf::from("tests/data/Dockerfile.complex");
     let mut dockerfile = Dockerfile::from(path.clone()).unwrap();
 
-    let temp_file = NamedTempFile::new().unwrap().path().to_path_buf();
+    let temp_file = std::env::temp_dir().join("Dockerfile.complex");
 
     dockerfile.path = temp_file.clone();
     dockerfile.dump().unwrap();
@@ -26,7 +25,7 @@ fn test_parse_and_dump() {
 }
 #[test]
 fn test_invalid_instruction_name() {
-    let temp_file = NamedTempFile::new().unwrap().path().to_path_buf();
+    let temp_file = std::env::temp_dir().join("Dockerfile.temp");
 
     let mut file = std::fs::File::create(temp_file.clone()).unwrap();
     writeln!(file, "MAKE love").unwrap();
