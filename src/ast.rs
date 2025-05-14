@@ -11,6 +11,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let add = Instruction::Add {
     ///     checksum: None,
     ///     chown: None,
@@ -33,6 +35,10 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use std::collections::BTreeMap;
+    ///
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let arg = Instruction::Arg(BTreeMap::from([
     ///     (String::from("ARG1"), Some(String::from("value1"))),
     ///     (String::from("ARG2"), None),
@@ -44,6 +50,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let cmd = Instruction::Cmd(Vec::from([
     ///     String::from("echo"),
     ///     String::from("Hello, World!"),
@@ -55,6 +63,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let copy = Instruction::Copy {
     ///     from: Some(String::from("builder")),
     ///     chown: None,
@@ -77,6 +87,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let entrypoint = Instruction::Entrypoint(Vec::from([String::from("entrypoint.sh")]));
     /// ```
     Entrypoint(Vec<String>),
@@ -85,6 +97,10 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use std::collections::BTreeMap;
+    ///
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let env = Instruction::Env(BTreeMap::from([
     ///     (String::from("ENV1"), String::from("value1")),
     ///     (String::from("ENV2"), String::from("value2")),
@@ -96,6 +112,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let expose = Instruction::Expose {
     ///     ports: Vec::from([String::from("8080")]),
     /// };
@@ -106,6 +124,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let from = Instruction::From {
     ///     platform: Some(String::from("linux/amd64")),
     ///     image: String::from("docker.io/library/fedora:latest"),
@@ -122,6 +142,10 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use std::collections::BTreeMap;
+    ///
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let label = Instruction::Label(BTreeMap::from([
     ///     (String::from("version"), String::from("1.0")),
     ///     (String::from("maintainer"), String::from("John Doe")),
@@ -133,6 +157,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let run = Instruction::Run {
     ///     mount: None,
     ///     network: None,
@@ -157,6 +183,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let shell = Instruction::Shell(Vec::from([String::from("/bin/sh"), String::from("-c")]));
     /// ```
     Shell(Vec<String>),
@@ -165,6 +193,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let stopsignal = Instruction::Stopsignal {
     ///     signal: String::from("SIGTERM"),
     /// };
@@ -175,6 +205,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let user = Instruction::User {
     ///     user: String::from("1001"),
     ///     group: None,
@@ -186,6 +218,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let volume = Instruction::Volume {
     ///     mounts: Vec::from([String::from("/data")]),
     /// };
@@ -196,6 +230,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let workdir = Instruction::Workdir {
     ///     path: String::from("/app"),
     /// };
@@ -206,6 +242,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let comment = Instruction::Comment(String::from("# This is a comment"));
     /// ```
     Comment(String),
@@ -214,6 +252,8 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
     /// let empty = Instruction::Empty;
     /// ```
     Empty,

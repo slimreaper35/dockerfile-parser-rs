@@ -54,7 +54,7 @@ impl Dockerfile {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```no_run
     /// use std::path::PathBuf;
     ///
     /// use dockerfile_parser_rs::Dockerfile;
@@ -84,7 +84,7 @@ impl Dockerfile {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```no_run
     /// use std::path::PathBuf;
     ///
     /// use dockerfile_parser_rs::Dockerfile;
