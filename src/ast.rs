@@ -3,8 +3,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use crate::quoter::Quoter;
-
 #[derive(Debug)]
 /// This enum represents available instructions in a Dockerfile and their associated data.
 pub enum Instruction {
@@ -233,30 +231,15 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    helpers::format_instruction_option("checksum", checksum),
-                    helpers::format_instruction_option("chown", chown),
-                    helpers::format_instruction_option("chmod", chmod),
-                    helpers::format_instruction_option("link", link),
+                    helpers::format_instruction_option("checksum", checksum.as_ref()),
+                    helpers::format_instruction_option("chown", chown.as_ref()),
+                    helpers::format_instruction_option("chmod", chmod.as_ref()),
+                    helpers::format_instruction_option("link", link.as_ref()),
                 ];
-
                 let prefix = helpers::format_options_string(&options);
-                write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
+                write!(f, "ADD {prefix}{} {destination}", sources.join(" "))
             }
-            Instruction::Arg(args) => {
-                let arg_string = args
-                    .iter()
-                    .map(|(key, value)| {
-                        if let Some(default) = value {
-                            format!("{key}={default}")
-                        } else {
-                            key.to_owned()
-                        }
-                    })
-                    .collect::<Vec<String>>()
-                    .join(" ");
-
-                write!(f, "ARG {arg_string}")
-            }
+            Instruction::Arg(args) => write!(f, "ARG {}", helpers::format_optional_btree_map(args)),
             Instruction::Cmd(cmd) => write!(f, "CMD {cmd:?}"),
             Instruction::Copy {
                 from,
@@ -267,26 +250,26 @@ impl fmt::Display for Instruction {
                 destination,
             } => {
                 let options = vec![
-                    helpers::format_instruction_option("from", from),
-                    helpers::format_instruction_option("chown", chown),
-                    helpers::format_instruction_option("chmod", chmod),
-                    helpers::format_instruction_option("link", link),
+                    helpers::format_instruction_option("from", from.as_ref()),
+                    helpers::format_instruction_option("chown", chown.as_ref()),
+                    helpers::format_instruction_option("chmod", chmod.as_ref()),
+                    helpers::format_instruction_option("link", link.as_ref()),
                 ];
-
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "COPY {prefix}{} {destination}", sources.join(" "))
             }
             Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
-            Instruction::Env(env) => {
-                write!(f, "ENV {}", helpers::format_btree_map(env))
-            }
+            Instruction::Env(env) => write!(f, "ENV {}", helpers::format_btree_map(env)),
             Instruction::Expose { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
             Instruction::From {
                 platform,
                 image,
                 alias,
             } => {
-                let options = vec![helpers::format_instruction_option("platform", platform)];
+                let options = vec![helpers::format_instruction_option(
+                    "platform",
+                    platform.as_ref(),
+                )];
                 let prefix = helpers::format_options_string(&options);
 
                 let mut line = format!("FROM {prefix}{image}");
@@ -294,12 +277,9 @@ impl fmt::Display for Instruction {
                     line.push_str(" AS ");
                     line.push_str(alias);
                 }
-
                 write!(f, "{line}")
             }
-            Instruction::Label(labels) => {
-                write!(f, "LABEL {}", helpers::format_btree_map(labels))
-            }
+            Instruction::Label(labels) => write!(f, "LABEL {}", helpers::format_btree_map(labels)),
             Instruction::Run {
                 mount,
                 network,
@@ -308,33 +288,27 @@ impl fmt::Display for Instruction {
                 heredoc,
             } => {
                 let options = vec![
-                    helpers::format_instruction_option("mount", mount),
-                    helpers::format_instruction_option("network", network),
-                    helpers::format_instruction_option("security", security),
+                    helpers::format_instruction_option("mount", mount.as_ref()),
+                    helpers::format_instruction_option("network", network.as_ref()),
+                    helpers::format_instruction_option("security", security.as_ref()),
                 ];
-
                 let prefix = helpers::format_options_string(&options);
-
-                if let Some(heredoc) = heredoc {
-                    write!(
+                match heredoc {
+                    Some(heredoc) => write!(
                         f,
                         "RUN {prefix}{}\n{}",
                         command.join(" "),
                         heredoc.join("\n")
-                    )
-                } else {
-                    write!(f, "RUN {prefix}{command:?}")
+                    ),
+                    None => write!(f, "RUN {prefix}{command:?}"),
                 }
             }
             Instruction::Shell(shell) => write!(f, "SHELL {shell:?}"),
             Instruction::Stopsignal { signal } => write!(f, "STOPSIGNAL {signal}"),
-            Instruction::User { user, group } => {
-                if let Some(group) = group {
-                    write!(f, "USER {user}:{group}")
-                } else {
-                    write!(f, "USER {user}")
-                }
-            }
+            Instruction::User { user, group } => match group {
+                Some(group) => write!(f, "USER {user}:{group}"),
+                None => write!(f, "USER {user}"),
+            },
             Instruction::Volume { mounts } => write!(f, "VOLUME {mounts:?}"),
             Instruction::Workdir { path } => write!(f, "WORKDIR {path}"),
             Instruction::Comment(comment) => write!(f, "{comment}"),
@@ -344,9 +318,11 @@ impl fmt::Display for Instruction {
 }
 
 mod helpers {
-    use super::*;
+    use std::collections::BTreeMap;
 
-    pub fn format_instruction_option(key: &str, value: &Option<String>) -> String {
+    use crate::quoter::Quoter;
+
+    pub fn format_instruction_option(key: &str, value: Option<&String>) -> String {
         value
             .as_ref()
             .map(|v| format!("--{key}={v}"))
@@ -374,6 +350,17 @@ mod helpers {
             .iter()
             .map(|(key, value)| format!("{key}={}", value.enquote()))
             .collect::<Vec<String>>()
+            .join(" ")
+    }
+
+    pub fn format_optional_btree_map(pairs: &BTreeMap<String, Option<String>>) -> String {
+        pairs
+            .iter()
+            .map(|(k, v)| match v {
+                Some(v) => format!("{k}={v}"),
+                None => k.clone(),
+            })
+            .collect::<Vec<_>>()
             .join(" ")
     }
 }

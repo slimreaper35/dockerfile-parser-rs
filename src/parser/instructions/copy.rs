@@ -2,7 +2,7 @@ use crate::ast::Instruction;
 use crate::parser::utils::get_options_from;
 use crate::quoter::Quoter;
 
-pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     let (options_map, remaining) = get_options_from(arguments);
 
     if remaining.len() < 2 {
@@ -18,7 +18,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         link = Some(String::from("true"));
     }
 
-    let mut sources: Vec<String> = remaining.iter().map(|s| s.dequote()).collect();
+    let mut sources: Vec<String> = remaining.iter().map(Quoter::dequote).collect();
     let destination = sources.pop().unwrap().dequote();
 
     Ok(Instruction::Copy {

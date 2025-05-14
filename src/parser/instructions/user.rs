@@ -2,7 +2,7 @@ use crate::ast::Instruction;
 use crate::quoter::Quoter;
 use crate::symbols::chars::COLON;
 
-pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     if arguments.len() != 1 {
         anyhow::bail!("The USER instruction must have exactly one argument");
     }

@@ -35,6 +35,7 @@ impl Dockerfile {
     /// Creates a new `Dockerfile` instance for the given path and instructions.
     ///
     /// The actual file does not need to exist at this point.
+    #[must_use]
     pub fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
         Dockerfile { path, instructions }
     }
@@ -42,6 +43,7 @@ impl Dockerfile {
     /// Creates an empty `Dockerfile` instance for the given path.
     ///
     /// The actual file does not need to exist at this point.
+    #[must_use]
     pub fn empty(path: PathBuf) -> Self {
         Dockerfile::new(path, Vec::new())
     }
@@ -64,6 +66,10 @@ impl Dockerfile {
     ///     Ok(())
     /// }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
         let mut dockerfile = Dockerfile::empty(path);
         dockerfile.instructions = dockerfile.parse()?;
@@ -91,6 +97,10 @@ impl Dockerfile {
     ///     Ok(())
     /// }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn parse(&self) -> ParseResult<Vec<Instruction>> {
         let file = File::open(&self.path).map_err(|e| ParseError::FileError(e.to_string()))?;
         let lines = read_lines(&file);
@@ -103,25 +113,25 @@ impl Dockerfile {
                 instructions.push(Instruction::Empty);
             // preserve comments
             } else if line.starts_with(HASHTAG) {
-                instructions.push(Instruction::Comment(line.to_owned()));
+                instructions.push(Instruction::Comment(line.clone()));
             } else {
                 let (instruction, arguments) = split_instruction_and_arguments(&line)?;
                 let instruction = match instruction.as_str() {
-                    "ADD" => add::parse(arguments),
-                    "ARG" => arg::parse(arguments),
-                    "CMD" => cmd::parse(arguments),
-                    "COPY" => copy::parse(arguments),
-                    "ENTRYPOINT" => entrypoint::parse(arguments),
-                    "ENV" => env::parse(arguments),
+                    "ADD" => add::parse(&arguments),
+                    "ARG" => arg::parse(&arguments),
+                    "CMD" => cmd::parse(&arguments),
+                    "COPY" => copy::parse(&arguments),
+                    "ENTRYPOINT" => entrypoint::parse(&arguments),
+                    "ENV" => env::parse(&arguments),
                     "EXPOSE" => expose::parse(arguments),
-                    "LABEL" => label::parse(arguments),
-                    "FROM" => from::parse(arguments),
-                    "RUN" => run::parse(arguments),
-                    "SHELL" => shell::parse(arguments),
-                    "STOPSIGNAL" => stopsignal::parse(arguments),
-                    "USER" => user::parse(arguments),
-                    "VOLUME" => volume::parse(arguments),
-                    "WORKDIR" => workdir::parse(arguments),
+                    "LABEL" => label::parse(&arguments),
+                    "FROM" => from::parse(&arguments),
+                    "RUN" => run::parse(&arguments),
+                    "SHELL" => shell::parse(&arguments),
+                    "STOPSIGNAL" => stopsignal::parse(&arguments),
+                    "USER" => user::parse(&arguments),
+                    "VOLUME" => volume::parse(&arguments),
+                    "WORKDIR" => workdir::parse(&arguments),
                     _ => return Err(ParseError::UnknownInstruction(instruction)),
                 };
                 match instruction {
@@ -139,6 +149,10 @@ impl Dockerfile {
     ///
     /// If the file does not exist, it will be created.
     /// If the file exists, it will be overwritten.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be created or written to.
     pub fn dump(&self) -> std::io::Result<()> {
         let mut file = File::create(&self.path)?;
         for instruction in &self.instructions {
@@ -148,6 +162,7 @@ impl Dockerfile {
     }
 
     /// Returns number of instructions in the Dockerfile.
+    #[must_use]
     pub fn steps(&self) -> usize {
         self.instructions
             .iter()
@@ -156,6 +171,7 @@ impl Dockerfile {
     }
 
     /// Returns number of layers in the Dockerfile.
+    #[must_use]
     pub fn layers(&self) -> usize {
         self.instructions
             .iter()
@@ -169,6 +185,7 @@ impl Dockerfile {
     }
 
     /// Returns number of stages in the Dockerfile.
+    #[must_use]
     pub fn stages(&self) -> usize {
         self.instructions
             .iter()

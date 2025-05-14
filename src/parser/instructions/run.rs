@@ -6,7 +6,7 @@ use crate::parser::utils::is_exec_form;
 use crate::symbols::strings::HEREDOC_START;
 use crate::utils::split_heredoc;
 
-pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     let (options, remaining) = get_options_from(arguments);
 
     if remaining.is_empty() {
@@ -39,9 +39,9 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     }
 
     let command = if is_exec_form(&remaining) {
-        clean_exec_form(remaining)
+        clean_exec_form(&remaining)
     } else {
-        clean_shell_form(remaining)
+        clean_shell_form(&remaining)
     };
     let heredoc = None;
 

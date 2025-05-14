@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::sync::LazyLock;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 
 use crate::ParseResult;
@@ -92,7 +92,7 @@ fn add_heredoc_newline(string: &mut String) {
 
 pub fn split_instruction_and_arguments(line: &str) -> ParseResult<(String, Vec<String>)> {
     // https://docs.docker.com/reference/dockerfile/#format
-    static RE: Lazy<Regex> = Lazy::new(|| {
+    static RE: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r"^(?P<instruction>[A-Z][A-Z0-9]*)\s+(?P<arguments>\S.+)$").unwrap()
     });
 

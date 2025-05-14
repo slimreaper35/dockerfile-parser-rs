@@ -1,6 +1,6 @@
 use crate::ast::Instruction;
 
-pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     if arguments.len() != 1 {
         anyhow::bail!("The STOPSIGNAL instruction must have exactly one argument");
     }

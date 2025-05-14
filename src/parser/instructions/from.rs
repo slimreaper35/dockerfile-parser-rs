@@ -1,7 +1,7 @@
 use crate::ast::Instruction;
 use crate::parser::utils::get_options_from;
 
-pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     let (options, remaining) = get_options_from(arguments);
 
     if remaining.is_empty() {

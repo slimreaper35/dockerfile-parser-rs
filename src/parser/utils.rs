@@ -16,7 +16,7 @@ pub fn is_exec_form(arguments: &[String]) -> bool {
     )
 }
 
-pub fn clean_shell_form(arguments: Vec<String>) -> Vec<String> {
+pub fn clean_shell_form(arguments: &[String]) -> Vec<String> {
     arguments
         .iter()
         .map(|arg| arg.replace(DOUBLE_QUOTE, EMPTY))
@@ -24,7 +24,7 @@ pub fn clean_shell_form(arguments: Vec<String>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean_exec_form(arguments: Vec<String>) -> Vec<String> {
+pub fn clean_exec_form(arguments: &[String]) -> Vec<String> {
     arguments
         .iter()
         .map(|arg| {
@@ -38,30 +38,26 @@ pub fn clean_exec_form(arguments: Vec<String>) -> Vec<String> {
         .collect()
 }
 
-pub fn get_options_from(arguments: Vec<String>) -> (HashMap<String, String>, Vec<String>) {
+pub fn get_options_from(arguments: &[String]) -> (HashMap<String, String>, Vec<String>) {
     let mut options = HashMap::new();
     let mut remaining = Vec::new();
 
     // some options can be passed multiple times
     let mut options_counter = 0;
 
-    for arg in &arguments {
+    for arg in arguments {
         if let Some(stripped) = arg.strip_prefix(HYPHEN_MINUS) {
             options_counter += 1;
-            match stripped.split_once(EQUALS) {
-                Some((key, value)) => {
-                    options.insert(key.to_owned(), value.to_owned());
-                    continue;
-                }
-                // some options have default values
-                // https://docs.docker.com/reference/dockerfile/#copy---link
-                None => {
-                    options.insert(stripped.to_owned(), EMPTY.to_owned());
-                    continue;
-                }
+
+            if let Some((key, value)) = stripped.split_once(EQUALS) {
+                options.insert(key.to_owned(), value.to_owned());
+            } else {
+                // some options can have default values
+                options.insert(stripped.to_owned(), EMPTY.to_owned());
             }
+        } else {
+            break;
         }
-        break;
     }
 
     remaining.extend(arguments.iter().skip(options_counter).cloned());
@@ -74,25 +70,24 @@ pub fn process_key_value_pairs(arguments: &[String]) -> BTreeMap<String, String>
     let mut last_key: Option<String> = None;
 
     for arg in arguments {
-        let (key, value) = match arg.split_once(EQUALS) {
-            Some((key, value)) => (key.to_owned(), value.to_owned()),
+        let (key, value) = if let Some((key, value)) = arg.split_once(EQUALS) {
+            (key.to_owned(), value.to_owned())
+        } else {
             // try to append the value to the last key
-            None => {
-                if last_key.is_none() {
-                    continue;
-                }
-
-                let last_key = last_key.unwrap();
-                let last_value = result.get(&last_key).unwrap();
-
-                let new_value = format!("{last_value} {arg}");
-
-                (last_key, new_value)
+            if last_key.is_none() {
+                continue;
             }
+
+            let last_key = last_key.unwrap();
+            let last_value = result.get(&last_key).unwrap();
+
+            let new_value = format!("{last_value} {arg}");
+
+            (last_key, new_value)
         };
 
         result.insert(
-            key.to_owned(),
+            key.clone(),
             value
                 .trim_start_matches(DOUBLE_QUOTE)
                 .trim_end_matches(DOUBLE_QUOTE)
@@ -154,8 +149,8 @@ mod tests {
     #[test]
     fn test_clean_shell_form() {
         let shell_form = String::from("echo \"Hello, World!\"");
-        let arguments = shell_form.split_whitespace().map(String::from).collect();
-        let cleaned = clean_shell_form(arguments);
+        let arguments: Vec<String> = shell_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_shell_form(&arguments);
 
         assert_eq!(
             cleaned,
@@ -170,8 +165,8 @@ mod tests {
     #[test]
     fn test_clean_exec_form() {
         let exec_form = String::from("[\"/usr/bin/executable\", \"arg1\", \"arg2\"]");
-        let arguments = exec_form.split_whitespace().map(String::from).collect();
-        let cleaned = clean_exec_form(arguments);
+        let arguments: Vec<String> = exec_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_exec_form(&arguments);
 
         assert_eq!(
             cleaned,
@@ -186,8 +181,8 @@ mod tests {
     #[test]
     fn test_clean_exec_form_with_spaces() {
         let exec_form = String::from("[\"/usr/bin/executable\", \"arg1 with spaces\", \"arg2\"]");
-        let arguments = exec_form.split_whitespace().map(String::from).collect();
-        let cleaned = clean_exec_form(arguments);
+        let arguments: Vec<String> = exec_form.split_whitespace().map(String::from).collect();
+        let cleaned = clean_exec_form(&arguments);
 
         assert_eq!(
             cleaned,
@@ -209,7 +204,7 @@ mod tests {
             String::from("arg1"),
             String::from("arg2"),
         ];
-        let (options, remaining) = get_options_from(arguments);
+        let (options, remaining) = get_options_from(&arguments);
 
         assert_eq!(
             options.get("option1"),
@@ -228,7 +223,7 @@ mod tests {
             String::from("--option1=value1"),
             String::from("--option2=value2"),
         ];
-        let (options, remaining) = get_options_from(arguments);
+        let (options, remaining) = get_options_from(&arguments);
 
         assert_eq!(
             options.get("option1"),
@@ -244,7 +239,7 @@ mod tests {
     #[test]
     fn test_get_options_from_no_options() {
         let arguments = vec![String::from("arg1"), String::from("arg2")];
-        let (options, remaining) = get_options_from(arguments);
+        let (options, remaining) = get_options_from(&arguments);
 
         assert!(options.is_empty());
         assert_eq!(remaining, vec!["arg1", "arg2"]);
@@ -258,7 +253,7 @@ mod tests {
             String::from("arg1"),
             String::from("arg2"),
         ];
-        let (options, remaining) = get_options_from(arguments);
+        let (options, remaining) = get_options_from(&arguments);
 
         assert_eq!(options.get("option1"), Some(String::from("")).as_ref());
         assert_eq!(options.get("option2"), Some(String::from("")).as_ref());
