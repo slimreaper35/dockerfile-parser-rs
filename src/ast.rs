@@ -6,8 +6,22 @@ use std::fmt;
 use crate::quoter::Quoter;
 
 #[derive(Debug)]
-/// This enum represents available instructions in a Dockerfile.
+/// This enum represents available instructions in a Dockerfile and their associated data.
 pub enum Instruction {
+    /// Represents an ADD instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let add = Instruction::ADD {
+    ///     checksum: None,
+    ///     chown: None,
+    ///     chmod: None,
+    ///     link: None,
+    ///     sources: Vec::from([String::from("source1"), String::from("source2")]),
+    ///     destination: String::from("/destination"),
+    /// };
+    /// ```
     ADD {
         checksum: Option<String>,
         chown: Option<String>,
@@ -16,8 +30,42 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
+    /// Represents an ARG instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let arg = Instruction::ARG(BTreeMap::from([
+    ///     (String::from("ARG1"), Some(String::from("value1"))),
+    ///     (String::from("ARG2"), None),
+    /// ]));
+    /// ```
     ARG(BTreeMap<String, Option<String>>),
+    /// Represents a CMD instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let cmd = Instruction::CMD(Vec::from([
+    ///     String::from("echo"),
+    ///     String::from("Hello, World!"),
+    /// ]));
+    /// ```
     CMD(Vec<String>),
+    /// Represents a COPY instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let copy = Instruction::COPY {
+    ///     from: Some(String::from("builder")),
+    ///     chown: None,
+    ///     chmod: None,
+    ///     link: None,
+    ///     sources: Vec::from([String::from("source1"), String::from("source2")]),
+    ///     destination: String::from("/destination"),
+    /// };
+    /// ```
     COPY {
         from: Option<String>,
         chown: Option<String>,
@@ -26,30 +74,77 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
+    /// Represents an ENTRYPOINT instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let entrypoint = Instruction::ENTRYPOINT(Vec::from([String::from("entrypoint.sh")]));
+    /// ```
     ENTRYPOINT(Vec<String>),
+    /// Represents an ENV instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let env = Instruction::ENV(BTreeMap::from([
+    ///     (String::from("ENV1"), String::from("value1")),
+    ///     (String::from("ENV2"), String::from("value2")),
+    /// ]));
+    /// ```
     ENV(BTreeMap<String, String>),
-    EXPOSE {
-        ports: Vec<String>,
-    },
+    /// Represents an EXPOSE instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let expose = Instruction::EXPOSE {
+    ///     ports: Vec::from([String::from("8080")]),
+    /// };
+    /// ```
+    EXPOSE { ports: Vec<String> },
+    /// Represents a FROM instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let from = Instruction::FROM {
+    ///     platform: Some(String::from("linux/amd64")),
+    ///     image: String::from("docker.io/library/fedora:latest"),
+    ///     alias: Some(String::from("builder")),
+    /// };
+    /// ```
     FROM {
         platform: Option<String>,
         image: String,
         alias: Option<String>,
     },
+    /// Represents a LABEL instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let label = Instruction::LABEL(BTreeMap::from([
+    ///     (String::from("version"), String::from("1.0")),
+    ///     (String::from("maintainer"), String::from("John Doe")),
+    /// ]));
+    /// ```
     LABEL(BTreeMap<String, String>),
-    /// # Example
+    /// Represents a RUN instruction in the Dockerfile.
+    ///
+    /// ### Example
     ///
     /// ```
     /// let run = Instruction::RUN {
     ///     mount: None,
     ///     network: None,
     ///     security: None,
-    ///     command: vec![String::from("<<EOF")],
-    ///     heredoc: Some(vec![
+    ///     command: Vec::from([String::from("<<EOF")]),
+    ///     heredoc: Some(Vec::from([
     ///         String::from("dnf upgrade -y"),
     ///         String::from("dnf install -y rustup"),
     ///         String::from("EOF"),
-    ///     ]),
+    ///     ])),
     /// };
     /// ```
     RUN {
@@ -59,24 +154,70 @@ pub enum Instruction {
         command: Vec<String>,
         heredoc: Option<Vec<String>>,
     },
+    /// Represents a SHELL instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let shell = Instruction::SHELL(Vec::from([String::from("/bin/sh"), String::from("-c")]));
+    /// ```
     SHELL(Vec<String>),
-    STOPSIGNAL {
-        signal: String,
-    },
-    USER {
-        user: String,
-        group: Option<String>,
-    },
-    VOLUME {
-        mounts: Vec<String>,
-    },
-    WORKDIR {
-        path: String,
-    },
-    //-------------//
-    //    extra    //
-    //-------------//
+    /// Represents a STOPSIGNAL instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let stopsignal = Instruction::STOPSIGNAL {
+    ///     signal: String::from("SIGTERM"),
+    /// };
+    /// ```
+    STOPSIGNAL { signal: String },
+    /// Represents a USER instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let user = Instruction::USER {
+    ///     user: String::from("1001"),
+    ///     group: None,
+    /// };
+    /// ```
+    USER { user: String, group: Option<String> },
+    /// Represents a VOLUME instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let volume = Instruction::VOLUME {
+    ///     mounts: Vec::from([String::from("/data")]),
+    /// };
+    /// ```
+    VOLUME { mounts: Vec<String> },
+    /// Represents a WORKDIR instruction in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let workdir = Instruction::WORKDIR {
+    ///     path: String::from("/app"),
+    /// };
+    /// ```
+    WORKDIR { path: String },
+    /// Represents a comment in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let comment = Instruction::COMMENT(String::from("# This is a comment"));
+    /// ```
     COMMENT(String),
+    /// Represents an empty line in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let empty = Instruction::EMPTY;
+    /// ```
     EMPTY,
 }
 
@@ -196,9 +337,6 @@ impl fmt::Display for Instruction {
             }
             Instruction::VOLUME { mounts } => write!(f, "VOLUME {mounts:?}"),
             Instruction::WORKDIR { path } => write!(f, "WORKDIR {path}"),
-            //-------------//
-            //    extra    //
-            //-------------//
             Instruction::COMMENT(comment) => write!(f, "{comment}"),
             Instruction::EMPTY => write!(f, ""),
         }

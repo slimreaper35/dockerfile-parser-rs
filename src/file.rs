@@ -60,7 +60,7 @@ impl Dockerfile {
     ///
     /// fn main() -> ParseResult<()> {
     ///     let dockerfile = Dockerfile::from(PathBuf::from("./Dockerfile"))?;
-    ///     println!("{:#?}", dockerfile.instructions);
+    ///     println!("{:#?}", dockerfile);
     ///     Ok(())
     /// }
     /// ```
