@@ -1,4 +1,6 @@
+use crate::ParseResult;
 use crate::ast::Instruction;
+use crate::error::ParseError;
 use crate::parser::utils::clean_exec_form;
 use crate::parser::utils::clean_shell_form;
 use crate::parser::utils::get_options_from;
@@ -6,11 +8,13 @@ use crate::parser::utils::is_exec_form;
 use crate::symbols::strings::HEREDOC_START;
 use crate::utils::split_heredoc;
 
-pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     let (options, remaining) = get_options_from(arguments);
 
     if remaining.is_empty() {
-        anyhow::bail!("The RUN instruction must have at least one argument");
+        return Err(ParseError::MissingArgument(String::from(
+            "RUN requires at least one argument",
+        )));
     }
 
     let mount = options.get("mount").cloned();

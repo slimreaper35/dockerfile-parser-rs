@@ -1,11 +1,15 @@
+use crate::ParseResult;
 use crate::ast::Instruction;
+use crate::error::ParseError;
 use crate::parser::utils::get_options_from;
 
-pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     let (options, remaining) = get_options_from(arguments);
 
     if remaining.is_empty() {
-        anyhow::bail!("The FROM instruction must have at least one argument");
+        return Err(ParseError::MissingArgument(String::from(
+            "FROM requires either one argument, or three: FROM <source> [AS <name>]",
+        )));
     }
 
     let platform = options.get("platform").cloned();
@@ -15,7 +19,9 @@ pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
     let alias = remaining.get(2);
 
     if keyword.is_some() && alias.is_none() {
-        anyhow::bail!("Missing alias for FROM instruction");
+        return Err(ParseError::MissingArgument(String::from(
+            "FROM requires either one argument, or three: FROM <source> [AS <name>]",
+        )));
     }
 
     Ok(Instruction::From {

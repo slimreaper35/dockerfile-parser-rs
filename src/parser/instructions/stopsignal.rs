@@ -1,8 +1,12 @@
+use crate::ParseResult;
 use crate::ast::Instruction;
+use crate::error::ParseError;
 
-pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     if arguments.len() != 1 {
-        anyhow::bail!("The STOPSIGNAL instruction must have exactly one argument");
+        return Err(ParseError::BadNumberOfArguments(String::from(
+            "STOPSIGNAL requires exactly one argument",
+        )));
     }
 
     let signal = arguments.first().unwrap().to_owned();

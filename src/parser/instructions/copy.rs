@@ -1,12 +1,16 @@
+use crate::ParseResult;
 use crate::ast::Instruction;
+use crate::error::ParseError;
 use crate::parser::utils::get_options_from;
 use crate::quoter::Quoter;
 
-pub fn parse(arguments: &[String]) -> anyhow::Result<Instruction> {
+pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     let (options_map, remaining) = get_options_from(arguments);
 
     if remaining.len() < 2 {
-        anyhow::bail!("The COPY instruction must have at least two arguments");
+        return Err(ParseError::MissingArgument(String::from(
+            "COPY requires at least two arguments",
+        )));
     }
 
     let from = options_map.get("from").cloned();

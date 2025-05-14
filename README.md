@@ -2,9 +2,8 @@
 
 [![version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
 
-The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
-
-**If you find it useful, please consider giving it a star on GitHub. Thank you so much!**
+The ultimate Rust library for parsing, modifying, and generating Dockerfiles with
+**only one dependency**. It provides a simple and efficient way to work with Dockerfiles in Rust.
 
 ## Instructions
 
@@ -61,6 +60,28 @@ fn main() {
 
 ...or things to keep in mind when using this library.
 
+### Instruction case sensitivity
+
+The instructions are not case-sensitive. However, the library works only with uppercase instructions
+for simplicity and consistency. Using uppercase instructions is also recommended convention in
+[Dockerfile](https://docs.docker.com/reference/dockerfile/#format) format documentation.
+
+### Instruction arguments ordering
+
+Options for all instructions will be sorted in alphabetical order. This is done to ensure
+deterministic output when dumping a Dockerfile. The same applies to the `ARG`, `ENV`, and `LABEL`
+instructions when they have multiple key-value pairs defined on one line.
+
+### Here-documents (heredocs)
+
+Here-documents allow redirection of subsequent Dockerfile lines to the input of `RUN` or `COPY`
+commands. If such command contains a here-document the Dockerfile considers the next lines until the
+line only containing a here-doc delimiter as part of the same command.
+
+The here-documents syntax is only supported for the `RUN` instruction and only with the `EOF`
+delimiter. Make sure that here-documents are always terminated with an `EOF` character on a new
+line.
+
 ### Shell and exec form
 
 The `RUN`, `CMD`, and `ENTRYPOINT` instructions all have two possible forms:
@@ -74,23 +95,3 @@ the array is a command, flag, or argument.
 
 The library parses both forms, but only the exec form is supported for writing instructions back
 into a Dockerfile.
-
-**Note:** The `SHELL` instruction must be written in JSON (exec) form in a Dockerfile.
-
-### Instruction arguments ordering
-
-Options for all instructions will be sorted in alphabetical order. This is done to ensure
-deterministic output when dumping a Dockerfile. The same applies to the `ARG`, `ENV`, and `LABEL`
-instructions when they have multiple key-value pairs defined on one line.
-
-### Instruction case sensitivity
-
-The instructions are not case-sensitive. However, the library works only with uppercase instructions
-for simplicity and consistency. Using uppercase instructions is also recommended convention in
-[Dockerfile](https://docs.docker.com/reference/dockerfile/#format) format documentation.
-
-### Heredocs
-
-Heredoc syntax is supported only for the `RUN` instruction. When using the heredoc syntax, `EOF` is
-the only valid delimiter to signify the end of the multi-line string. Please ensure that your
-heredocs are always terminated with `EOF` on a new line.

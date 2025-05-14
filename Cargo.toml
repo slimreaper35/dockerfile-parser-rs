@@ -11,7 +11,6 @@ license = "MIT"
 keywords = ["containers", "docker", "dockerfile", "library", "parser"]
 
 [dependencies]
-anyhow = "1.0.98"
 regex = "1.11.1"
 
 [lints.clippy]

@@ -133,13 +133,8 @@ impl Dockerfile {
                     "VOLUME" => Ok(volume::parse(&arguments)),
                     "WORKDIR" => workdir::parse(&arguments),
                     _ => return Err(ParseError::UnknownInstruction(instruction)),
-                };
-                match instruction {
-                    Ok(instruction) => instructions.push(instruction),
-                    Err(e) => {
-                        return Err(ParseError::SyntaxError(format!("{line}: {e}")));
-                    }
-                }
+                }?;
+                instructions.push(instruction);
             }
         }
         Ok(instructions)
