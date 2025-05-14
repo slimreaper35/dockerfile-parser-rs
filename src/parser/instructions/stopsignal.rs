@@ -6,5 +6,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     }
 
     let signal = arguments.first().unwrap().to_owned();
-    Ok(Instruction::STOPSIGNAL { signal })
+    Ok(Instruction::Stopsignal { signal })
 }

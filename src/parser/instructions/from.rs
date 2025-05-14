@@ -18,7 +18,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         anyhow::bail!("Missing alias for FROM instruction");
     }
 
-    Ok(Instruction::FROM {
+    Ok(Instruction::From {
         platform,
         image,
         alias: alias.map(String::from),

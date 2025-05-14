@@ -100,10 +100,10 @@ impl Dockerfile {
         for line in lines {
             // preserve empty lines
             if line.is_empty() {
-                instructions.push(Instruction::EMPTY);
+                instructions.push(Instruction::Empty);
             // preserve comments
             } else if line.starts_with(HASHTAG) {
-                instructions.push(Instruction::COMMENT(line.to_owned()));
+                instructions.push(Instruction::Comment(line.to_owned()));
             } else {
                 let (instruction, arguments) = split_instruction_and_arguments(&line)?;
                 let instruction = match instruction.as_str() {
@@ -151,7 +151,7 @@ impl Dockerfile {
     pub fn steps(&self) -> usize {
         self.instructions
             .iter()
-            .filter(|i| !matches!(i, Instruction::EMPTY | Instruction::COMMENT { .. }))
+            .filter(|i| !matches!(i, Instruction::Empty | Instruction::Comment { .. }))
             .count()
     }
 
@@ -162,7 +162,7 @@ impl Dockerfile {
             .filter(|i| {
                 matches!(
                     i,
-                    Instruction::ADD { .. } | Instruction::COPY { .. } | Instruction::RUN { .. }
+                    Instruction::Add { .. } | Instruction::Copy { .. } | Instruction::Run { .. }
                 )
             })
             .count()
@@ -172,7 +172,7 @@ impl Dockerfile {
     pub fn stages(&self) -> usize {
         self.instructions
             .iter()
-            .filter(|i| matches!(i, Instruction::FROM { .. }))
+            .filter(|i| matches!(i, Instruction::From { .. }))
             .count()
     }
 }
@@ -184,12 +184,12 @@ mod tests {
     fn mock_dummy_dockerfile() -> Dockerfile {
         let path = PathBuf::from("./Dockerfile");
         let instructions = vec![
-            Instruction::FROM {
+            Instruction::From {
                 platform: None,
                 image: String::from("docker.io/library/fedora:latest"),
                 alias: Some(String::from("base")),
             },
-            Instruction::RUN {
+            Instruction::Run {
                 mount: None,
                 network: None,
                 security: None,
@@ -200,12 +200,12 @@ mod tests {
                 ],
                 heredoc: None,
             },
-            Instruction::FROM {
+            Instruction::From {
                 platform: None,
                 image: String::from("docker.io/library/ubuntu:latest"),
                 alias: Some(String::from("builder")),
             },
-            Instruction::COPY {
+            Instruction::Copy {
                 from: Some(String::from("base")),
                 chown: None,
                 chmod: None,
@@ -213,7 +213,7 @@ mod tests {
                 sources: vec![String::from("hello.txt")],
                 destination: String::from("/tmp/hello.txt"),
             },
-            Instruction::ENTRYPOINT(vec![String::from("/bin/bash")]),
+            Instruction::Entrypoint(vec![String::from("/bin/bash")]),
         ];
         Dockerfile::new(path, instructions)
     }

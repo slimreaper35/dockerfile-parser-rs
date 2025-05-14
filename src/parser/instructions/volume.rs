@@ -10,5 +10,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
         clean_shell_form(arguments)
     };
 
-    Ok(Instruction::VOLUME { mounts })
+    Ok(Instruction::Volume { mounts })
 }

@@ -7,5 +7,5 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     }
 
     let path = arguments.first().unwrap().dequote();
-    Ok(Instruction::WORKDIR { path })
+    Ok(Instruction::Workdir { path })
 }

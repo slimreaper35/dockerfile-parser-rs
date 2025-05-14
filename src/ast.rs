@@ -13,7 +13,7 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
-    /// let add = Instruction::ADD {
+    /// let add = Instruction::Add {
     ///     checksum: None,
     ///     chown: None,
     ///     chmod: None,
@@ -22,7 +22,7 @@ pub enum Instruction {
     ///     destination: String::from("/destination"),
     /// };
     /// ```
-    ADD {
+    Add {
         checksum: Option<String>,
         chown: Option<String>,
         chmod: Option<String>,
@@ -35,29 +35,29 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
-    /// let arg = Instruction::ARG(BTreeMap::from([
+    /// let arg = Instruction::Arg(BTreeMap::from([
     ///     (String::from("ARG1"), Some(String::from("value1"))),
     ///     (String::from("ARG2"), None),
     /// ]));
     /// ```
-    ARG(BTreeMap<String, Option<String>>),
+    Arg(BTreeMap<String, Option<String>>),
     /// Represents a CMD instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let cmd = Instruction::CMD(Vec::from([
+    /// let cmd = Instruction::Cmd(Vec::from([
     ///     String::from("echo"),
     ///     String::from("Hello, World!"),
     /// ]));
     /// ```
-    CMD(Vec<String>),
+    Cmd(Vec<String>),
     /// Represents a COPY instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let copy = Instruction::COPY {
+    /// let copy = Instruction::Copy {
     ///     from: Some(String::from("builder")),
     ///     chown: None,
     ///     chmod: None,
@@ -66,7 +66,7 @@ pub enum Instruction {
     ///     destination: String::from("/destination"),
     /// };
     /// ```
-    COPY {
+    Copy {
         from: Option<String>,
         chown: Option<String>,
         chmod: Option<String>,
@@ -79,42 +79,42 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
-    /// let entrypoint = Instruction::ENTRYPOINT(Vec::from([String::from("entrypoint.sh")]));
+    /// let entrypoint = Instruction::Entrypoint(Vec::from([String::from("entrypoint.sh")]));
     /// ```
-    ENTRYPOINT(Vec<String>),
+    Entrypoint(Vec<String>),
     /// Represents an ENV instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let env = Instruction::ENV(BTreeMap::from([
+    /// let env = Instruction::Env(BTreeMap::from([
     ///     (String::from("ENV1"), String::from("value1")),
     ///     (String::from("ENV2"), String::from("value2")),
     /// ]));
     /// ```
-    ENV(BTreeMap<String, String>),
+    Env(BTreeMap<String, String>),
     /// Represents an EXPOSE instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let expose = Instruction::EXPOSE {
+    /// let expose = Instruction::Expose {
     ///     ports: Vec::from([String::from("8080")]),
     /// };
     /// ```
-    EXPOSE { ports: Vec<String> },
+    Expose { ports: Vec<String> },
     /// Represents a FROM instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let from = Instruction::FROM {
+    /// let from = Instruction::From {
     ///     platform: Some(String::from("linux/amd64")),
     ///     image: String::from("docker.io/library/fedora:latest"),
     ///     alias: Some(String::from("builder")),
     /// };
     /// ```
-    FROM {
+    From {
         platform: Option<String>,
         image: String,
         alias: Option<String>,
@@ -124,18 +124,18 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
-    /// let label = Instruction::LABEL(BTreeMap::from([
+    /// let label = Instruction::Label(BTreeMap::from([
     ///     (String::from("version"), String::from("1.0")),
     ///     (String::from("maintainer"), String::from("John Doe")),
     /// ]));
     /// ```
-    LABEL(BTreeMap<String, String>),
+    Label(BTreeMap<String, String>),
     /// Represents a RUN instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let run = Instruction::RUN {
+    /// let run = Instruction::Run {
     ///     mount: None,
     ///     network: None,
     ///     security: None,
@@ -147,7 +147,7 @@ pub enum Instruction {
     ///     ])),
     /// };
     /// ```
-    RUN {
+    Run {
         mount: Option<String>,
         network: Option<String>,
         security: Option<String>,
@@ -159,72 +159,72 @@ pub enum Instruction {
     /// ### Example
     ///
     /// ```
-    /// let shell = Instruction::SHELL(Vec::from([String::from("/bin/sh"), String::from("-c")]));
+    /// let shell = Instruction::Shell(Vec::from([String::from("/bin/sh"), String::from("-c")]));
     /// ```
-    SHELL(Vec<String>),
+    Shell(Vec<String>),
     /// Represents a STOPSIGNAL instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let stopsignal = Instruction::STOPSIGNAL {
+    /// let stopsignal = Instruction::Stopsignal {
     ///     signal: String::from("SIGTERM"),
     /// };
     /// ```
-    STOPSIGNAL { signal: String },
+    Stopsignal { signal: String },
     /// Represents a USER instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let user = Instruction::USER {
+    /// let user = Instruction::User {
     ///     user: String::from("1001"),
     ///     group: None,
     /// };
     /// ```
-    USER { user: String, group: Option<String> },
+    User { user: String, group: Option<String> },
     /// Represents a VOLUME instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let volume = Instruction::VOLUME {
+    /// let volume = Instruction::Volume {
     ///     mounts: Vec::from([String::from("/data")]),
     /// };
     /// ```
-    VOLUME { mounts: Vec<String> },
+    Volume { mounts: Vec<String> },
     /// Represents a WORKDIR instruction in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let workdir = Instruction::WORKDIR {
+    /// let workdir = Instruction::Workdir {
     ///     path: String::from("/app"),
     /// };
     /// ```
-    WORKDIR { path: String },
+    Workdir { path: String },
     /// Represents a comment in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let comment = Instruction::COMMENT(String::from("# This is a comment"));
+    /// let comment = Instruction::Comment(String::from("# This is a comment"));
     /// ```
-    COMMENT(String),
+    Comment(String),
     /// Represents an empty line in the Dockerfile.
     ///
     /// ### Example
     ///
     /// ```
-    /// let empty = Instruction::EMPTY;
+    /// let empty = Instruction::Empty;
     /// ```
-    EMPTY,
+    Empty,
 }
 
 impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Instruction::ADD {
+            Instruction::Add {
                 checksum,
                 chown,
                 chmod,
@@ -242,7 +242,7 @@ impl fmt::Display for Instruction {
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "ADD {}{} {}", prefix, sources.join(" "), destination)
             }
-            Instruction::ARG(args) => {
+            Instruction::Arg(args) => {
                 let arg_string = args
                     .iter()
                     .map(|(key, value)| {
@@ -257,8 +257,8 @@ impl fmt::Display for Instruction {
 
                 write!(f, "ARG {arg_string}")
             }
-            Instruction::CMD(cmd) => write!(f, "CMD {cmd:?}"),
-            Instruction::COPY {
+            Instruction::Cmd(cmd) => write!(f, "CMD {cmd:?}"),
+            Instruction::Copy {
                 from,
                 chown,
                 chmod,
@@ -276,12 +276,12 @@ impl fmt::Display for Instruction {
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "COPY {prefix}{} {destination}", sources.join(" "))
             }
-            Instruction::ENTRYPOINT(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
-            Instruction::ENV(env) => {
+            Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
+            Instruction::Env(env) => {
                 write!(f, "ENV {}", helpers::format_btree_map(env))
             }
-            Instruction::EXPOSE { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
-            Instruction::FROM {
+            Instruction::Expose { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
+            Instruction::From {
                 platform,
                 image,
                 alias,
@@ -297,10 +297,10 @@ impl fmt::Display for Instruction {
 
                 write!(f, "{line}")
             }
-            Instruction::LABEL(labels) => {
+            Instruction::Label(labels) => {
                 write!(f, "LABEL {}", helpers::format_btree_map(labels))
             }
-            Instruction::RUN {
+            Instruction::Run {
                 mount,
                 network,
                 security,
@@ -326,19 +326,19 @@ impl fmt::Display for Instruction {
                     write!(f, "RUN {prefix}{command:?}")
                 }
             }
-            Instruction::SHELL(shell) => write!(f, "SHELL {shell:?}"),
-            Instruction::STOPSIGNAL { signal } => write!(f, "STOPSIGNAL {signal}"),
-            Instruction::USER { user, group } => {
+            Instruction::Shell(shell) => write!(f, "SHELL {shell:?}"),
+            Instruction::Stopsignal { signal } => write!(f, "STOPSIGNAL {signal}"),
+            Instruction::User { user, group } => {
                 if let Some(group) = group {
                     write!(f, "USER {user}:{group}")
                 } else {
                     write!(f, "USER {user}")
                 }
             }
-            Instruction::VOLUME { mounts } => write!(f, "VOLUME {mounts:?}"),
-            Instruction::WORKDIR { path } => write!(f, "WORKDIR {path}"),
-            Instruction::COMMENT(comment) => write!(f, "{comment}"),
-            Instruction::EMPTY => write!(f, ""),
+            Instruction::Volume { mounts } => write!(f, "VOLUME {mounts:?}"),
+            Instruction::Workdir { path } => write!(f, "WORKDIR {path}"),
+            Instruction::Comment(comment) => write!(f, "{comment}"),
+            Instruction::Empty => write!(f, ""),
         }
     }
 }
@@ -384,7 +384,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_add() {
-        let instruction = Instruction::ADD {
+        let instruction = Instruction::Add {
             checksum: None,
             chown: None,
             chmod: None,
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_arg() {
-        let instruction = Instruction::ARG(BTreeMap::from([
+        let instruction = Instruction::Arg(BTreeMap::from([
             (String::from("ARG2"), None),
             (String::from("ARG1"), Some(String::from("value1"))),
         ]));
@@ -412,7 +412,7 @@ mod tests {
     #[test]
     fn test_display_instruction_cmd() {
         let instruction =
-            Instruction::CMD(vec![String::from("echo"), String::from("Hello, World!")]);
+            Instruction::Cmd(vec![String::from("echo"), String::from("Hello, World!")]);
 
         let expected = "CMD [\"echo\", \"Hello, World!\"]";
         assert_eq!(instruction.to_string(), expected);
@@ -420,7 +420,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_copy() {
-        let instruction = Instruction::COPY {
+        let instruction = Instruction::Copy {
             from: Some(String::from("builder")),
             chown: None,
             chmod: None,
@@ -435,7 +435,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_entrypoint() {
-        let instruction = Instruction::ENTRYPOINT(vec![String::from("entrypoint.sh")]);
+        let instruction = Instruction::Entrypoint(vec![String::from("entrypoint.sh")]);
 
         let expected = "ENTRYPOINT [\"entrypoint.sh\"]";
         assert_eq!(instruction.to_string(), expected);
@@ -443,7 +443,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_env() {
-        let instruction = Instruction::ENV(BTreeMap::from([
+        let instruction = Instruction::Env(BTreeMap::from([
             (String::from("ENV2"), String::from("value2")),
             (String::from("ENV1"), String::from("value1")),
         ]));
@@ -455,7 +455,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_expose() {
-        let instruction = Instruction::EXPOSE {
+        let instruction = Instruction::Expose {
             ports: vec![String::from("80"), String::from("443")],
         };
 
@@ -465,7 +465,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_from() {
-        let instruction = Instruction::FROM {
+        let instruction = Instruction::From {
             platform: Some(String::from("linux/amd64")),
             image: String::from("docker.io/library/fedora:latest"),
             alias: Some(String::from("builder")),
@@ -477,7 +477,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_label() {
-        let instruction = Instruction::LABEL(BTreeMap::from([
+        let instruction = Instruction::Label(BTreeMap::from([
             (String::from("version"), String::from("1.0")),
             (String::from("maintainer"), String::from("John Doe")),
         ]));
@@ -489,7 +489,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_run() {
-        let instruction = Instruction::RUN {
+        let instruction = Instruction::Run {
             mount: None,
             network: None,
             security: None,
@@ -503,7 +503,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_run_with_heredoc() {
-        let instruction = Instruction::RUN {
+        let instruction = Instruction::Run {
             mount: None,
             network: None,
             security: None,
@@ -521,7 +521,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_run_with_heredoc_and_tabs() {
-        let instruction = Instruction::RUN {
+        let instruction = Instruction::Run {
             mount: None,
             network: None,
             security: None,
@@ -542,7 +542,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_shell() {
-        let instruction = Instruction::SHELL(vec![String::from("/bin/sh"), String::from("-c")]);
+        let instruction = Instruction::Shell(vec![String::from("/bin/sh"), String::from("-c")]);
 
         let expected = "SHELL [\"/bin/sh\", \"-c\"]";
         assert_eq!(instruction.to_string(), expected);
@@ -550,7 +550,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_user() {
-        let instruction = Instruction::USER {
+        let instruction = Instruction::User {
             user: String::from("root"),
             group: Some(String::from("root")),
         };
@@ -561,7 +561,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_volume() {
-        let instruction = Instruction::VOLUME {
+        let instruction = Instruction::Volume {
             mounts: vec![String::from("/data"), String::from("/var/log")],
         };
 
@@ -571,7 +571,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_workdir() {
-        let instruction = Instruction::WORKDIR {
+        let instruction = Instruction::Workdir {
             path: String::from("/app"),
         };
 
@@ -581,7 +581,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_comment() {
-        let instruction = Instruction::COMMENT(String::from("# This is a comment"));
+        let instruction = Instruction::Comment(String::from("# This is a comment"));
 
         let expected = "# This is a comment";
         assert_eq!(instruction.to_string(), expected);
@@ -589,7 +589,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_empty() {
-        let instruction = Instruction::EMPTY;
+        let instruction = Instruction::Empty;
 
         let expected = "";
         assert_eq!(instruction.to_string(), expected);

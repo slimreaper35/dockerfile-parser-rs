@@ -48,7 +48,7 @@ fn main() {
     let path = PathBuf::from("Dockerfile");
     let mut dockerfile = Dockerfile::from(path).unwrap();
 
-    dockerfile.instructions.push(Instruction::USER {
+    dockerfile.instructions.push(Instruction::User {
         user: String::from("1001"),
         group: None,
     });

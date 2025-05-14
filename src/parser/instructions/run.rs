@@ -29,7 +29,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
                 .collect::<Vec<String>>(),
         );
 
-        return Ok(Instruction::RUN {
+        return Ok(Instruction::Run {
             mount,
             network,
             security,
@@ -45,7 +45,7 @@ pub fn parse(arguments: Vec<String>) -> anyhow::Result<Instruction> {
     };
     let heredoc = None;
 
-    Ok(Instruction::RUN {
+    Ok(Instruction::Run {
         mount,
         network,
         security,
