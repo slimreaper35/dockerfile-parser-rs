@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -36,16 +37,16 @@ impl Dockerfile {
     ///
     /// The actual file does not need to exist at this point.
     #[must_use]
-    pub fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
-        Dockerfile { path, instructions }
+    pub const fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
+        Self { path, instructions }
     }
 
     /// Creates an empty `Dockerfile` instance for the given path.
     ///
     /// The actual file does not need to exist at this point.
     #[must_use]
-    pub fn empty(path: PathBuf) -> Self {
-        Dockerfile::new(path, Vec::new())
+    pub const fn empty(path: PathBuf) -> Self {
+        Self::new(path, Vec::new())
     }
 
     /// Parses the content of the Dockerfile and returns a populated `Dockerfile` instance.
@@ -71,7 +72,7 @@ impl Dockerfile {
     ///
     /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
-        let mut dockerfile = Dockerfile::empty(path);
+        let mut dockerfile = Self::empty(path);
         dockerfile.instructions = dockerfile.parse()?;
         Ok(dockerfile)
     }
@@ -148,7 +149,7 @@ impl Dockerfile {
     /// # Errors
     ///
     /// Returns an error if the file cannot be created or written to.
-    pub fn dump(&self) -> std::io::Result<()> {
+    pub fn dump(&self) -> io::Result<()> {
         let mut file = File::create(&self.path)?;
         for instruction in &self.instructions {
             writeln!(file, "{instruction}")?;

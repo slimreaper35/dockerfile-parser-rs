@@ -58,6 +58,16 @@ pub enum Instruction {
     /// ]));
     /// ```
     Cmd(Vec<String>),
+    /// Represents a comment in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
+    /// let comment = Instruction::Comment(String::from("# This is a comment"));
+    /// ```
+    Comment(String),
     /// Represents a COPY instruction in the Dockerfile.
     ///
     /// ### Example
@@ -82,6 +92,16 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
+    /// Represents an empty line in the Dockerfile.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// use dockerfile_parser_rs::Instruction;
+    ///
+    /// let empty = Instruction::Empty;
+    /// ```
+    Empty,
     /// Represents an ENTRYPOINT instruction in the Dockerfile.
     ///
     /// ### Example
@@ -237,32 +257,12 @@ pub enum Instruction {
     /// };
     /// ```
     Workdir { path: String },
-    /// Represents a comment in the Dockerfile.
-    ///
-    /// ### Example
-    ///
-    /// ```
-    /// use dockerfile_parser_rs::Instruction;
-    ///
-    /// let comment = Instruction::Comment(String::from("# This is a comment"));
-    /// ```
-    Comment(String),
-    /// Represents an empty line in the Dockerfile.
-    ///
-    /// ### Example
-    ///
-    /// ```
-    /// use dockerfile_parser_rs::Instruction;
-    ///
-    /// let empty = Instruction::Empty;
-    /// ```
-    Empty,
 }
 
 impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Instruction::Add {
+            Self::Add {
                 checksum,
                 chown,
                 chmod,
@@ -279,9 +279,10 @@ impl fmt::Display for Instruction {
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "ADD {prefix}{} {destination}", sources.join(" "))
             }
-            Instruction::Arg(args) => write!(f, "ARG {}", helpers::format_optional_btree_map(args)),
-            Instruction::Cmd(cmd) => write!(f, "CMD {cmd:?}"),
-            Instruction::Copy {
+            Self::Arg(args) => write!(f, "ARG {}", helpers::format_optional_btree_map(args)),
+            Self::Cmd(cmd) => write!(f, "CMD {cmd:?}"),
+            Self::Comment(comment) => write!(f, "{comment}"),
+            Self::Copy {
                 from,
                 chown,
                 chmod,
@@ -298,10 +299,11 @@ impl fmt::Display for Instruction {
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "COPY {prefix}{} {destination}", sources.join(" "))
             }
-            Instruction::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
-            Instruction::Env(env) => write!(f, "ENV {}", helpers::format_btree_map(env)),
-            Instruction::Expose { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
-            Instruction::From {
+            Self::Empty => write!(f, ""),
+            Self::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
+            Self::Env(env) => write!(f, "ENV {}", helpers::format_btree_map(env)),
+            Self::Expose { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
+            Self::From {
                 platform,
                 image,
                 alias,
@@ -319,8 +321,8 @@ impl fmt::Display for Instruction {
                 }
                 write!(f, "{line}")
             }
-            Instruction::Label(labels) => write!(f, "LABEL {}", helpers::format_btree_map(labels)),
-            Instruction::Run {
+            Self::Label(labels) => write!(f, "LABEL {}", helpers::format_btree_map(labels)),
+            Self::Run {
                 mount,
                 network,
                 security,
@@ -343,16 +345,14 @@ impl fmt::Display for Instruction {
                     None => write!(f, "RUN {prefix}{command:?}"),
                 }
             }
-            Instruction::Shell(shell) => write!(f, "SHELL {shell:?}"),
-            Instruction::Stopsignal { signal } => write!(f, "STOPSIGNAL {signal}"),
-            Instruction::User { user, group } => match group {
+            Self::Shell(shell) => write!(f, "SHELL {shell:?}"),
+            Self::Stopsignal { signal } => write!(f, "STOPSIGNAL {signal}"),
+            Self::User { user, group } => match group {
                 Some(group) => write!(f, "USER {user}:{group}"),
                 None => write!(f, "USER {user}"),
             },
-            Instruction::Volume { mounts } => write!(f, "VOLUME {mounts:?}"),
-            Instruction::Workdir { path } => write!(f, "WORKDIR {path}"),
-            Instruction::Comment(comment) => write!(f, "{comment}"),
-            Instruction::Empty => write!(f, ""),
+            Self::Volume { mounts } => write!(f, "VOLUME {mounts:?}"),
+            Self::Workdir { path } => write!(f, "WORKDIR {path}"),
         }
     }
 }
@@ -396,10 +396,7 @@ mod helpers {
     pub fn format_optional_btree_map(pairs: &BTreeMap<String, Option<String>>) -> String {
         pairs
             .iter()
-            .map(|(k, v)| match v {
-                Some(v) => format!("{k}={v}"),
-                None => k.clone(),
-            })
+            .map(|(k, v)| v.as_ref().map_or_else(|| k.clone(), |v| format!("{k}={v}")))
             .collect::<Vec<_>>()
             .join(" ")
     }

@@ -5,7 +5,7 @@ use crate::parser::utils::get_options_from;
 use crate::quoter::Quoter;
 
 pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
-    let (options_map, remaining) = get_options_from(arguments);
+    let (options, remaining) = get_options_from(arguments);
 
     if remaining.len() < 2 {
         return Err(ParseError::MissingArgument(String::from(
@@ -13,10 +13,10 @@ pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
         )));
     }
 
-    let from = options_map.get("from").cloned();
-    let chown = options_map.get("chown").cloned();
-    let chmod = options_map.get("chmod").cloned();
-    let mut link = options_map.get("link").cloned();
+    let from = options.get("from").cloned();
+    let chown = options.get("chown").cloned();
+    let chmod = options.get("chmod").cloned();
+    let mut link = options.get("link").cloned();
 
     if link.is_some() && link.clone().unwrap().is_empty() {
         link = Some(String::from("true"));
