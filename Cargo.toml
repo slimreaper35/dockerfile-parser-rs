@@ -1,7 +1,7 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "dockerfile-parser-rs"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Michal Šoltis <msoltis1@icloud.com>"]
 edition = "2024"
 description = "The ultimate Rust library for parsing, modifying, and generating Dockerfiles"
