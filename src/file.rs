@@ -26,7 +26,7 @@ use crate::utils::read_lines;
 use crate::utils::split_instruction_and_arguments;
 
 /// This struct represents a Dockerfile instance.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dockerfile {
     pub path: PathBuf,
     pub instructions: Vec<Instruction>,
@@ -206,11 +206,7 @@ mod tests {
                 mount: None,
                 network: None,
                 security: None,
-                command: vec![
-                    String::from("echo"),
-                    String::from("hello"),
-                    String::from("world"),
-                ],
+                command: vec![String::from("cat"), String::from("/etc/os-release")],
                 heredoc: None,
             },
             Instruction::From {
@@ -223,8 +219,8 @@ mod tests {
                 chown: None,
                 chmod: None,
                 link: None,
-                sources: vec![String::from("hello.txt")],
-                destination: String::from("/tmp/hello.txt"),
+                sources: vec![String::from("file.txt")],
+                destination: String::from("/tmp/file.txt"),
             },
             Instruction::Entrypoint(vec![String::from("/bin/bash")]),
         ];

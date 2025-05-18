@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// This enum represents available instructions in a Dockerfile and their associated data.
 pub enum Instruction {
     /// Represents an ADD instruction in the Dockerfile.
@@ -517,11 +517,11 @@ mod tests {
             mount: None,
             network: None,
             security: None,
-            command: vec![String::from("echo"), String::from("Hello, World!")],
+            command: vec![String::from("cat"), String::from("/etc/os-release")],
             heredoc: None,
         };
 
-        let expected = "RUN [\"echo\", \"Hello, World!\"]";
+        let expected = "RUN [\"cat\", \"/etc/os-release\"]";
         assert_eq!(instruction.to_string(), expected);
     }
 

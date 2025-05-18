@@ -57,3 +57,33 @@ pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
         heredoc,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_run() {
+        let arguments = vec![
+            String::from("--mount=type=bind,source=/host/path,target=/container/path"),
+            String::from("--network=host"),
+            String::from("--security=seccomp"),
+            String::from("cat"),
+            String::from("/etc/os-release"),
+        ];
+        let result = parse(&arguments).unwrap();
+
+        assert_eq!(
+            result,
+            Instruction::Run {
+                mount: Some(String::from(
+                    "type=bind,source=/host/path,target=/container/path"
+                )),
+                network: Some(String::from("host")),
+                security: Some(String::from("seccomp")),
+                command: vec![String::from("cat"), String::from("/etc/os-release")],
+                heredoc: None,
+            }
+        );
+    }
+}

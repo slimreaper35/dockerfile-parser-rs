@@ -156,4 +156,28 @@ mod tests {
         assert_eq!(instruction, "RUN");
         assert_eq!(arguments, vec!["arg1", "arg2"]);
     }
+
+    #[test]
+    fn test_add_heredoc_newline() {
+        let mut string = String::from("test");
+        add_heredoc_newline(&mut string);
+        assert_eq!(string, format!("test {} ", HEREDOC_NEWLINE));
+    }
+
+    #[test]
+    fn test_split_heredoc() {
+        let strings = vec![
+            String::from("test1"),
+            String::from(HEREDOC_NEWLINE),
+            String::from("test2"),
+            String::from(HEREDOC_NEWLINE),
+            String::from("test3"),
+        ];
+        let result = split_heredoc(strings);
+
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0], vec![String::from("test1")]);
+        assert_eq!(result[1], vec![String::from("test2")]);
+        assert_eq!(result[2], vec![String::from("test3")]);
+    }
 }

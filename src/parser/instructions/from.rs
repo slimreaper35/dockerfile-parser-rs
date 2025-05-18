@@ -30,3 +30,50 @@ pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
         alias: alias.map(String::from),
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_with_alias() {
+        let arguments = vec![
+            String::from("ubuntu:latest"),
+            String::from("AS"),
+            String::from("builder"),
+        ];
+        let result = parse(&arguments).unwrap();
+
+        assert_eq!(
+            result,
+            Instruction::From {
+                platform: None,
+                image: String::from("ubuntu:latest"),
+                alias: Some(String::from("builder")),
+            }
+        );
+    }
+
+    #[test]
+    fn test_from_without_alias() {
+        let arguments = vec![String::from("ubuntu:latest")];
+        let result = parse(&arguments).unwrap();
+
+        assert_eq!(
+            result,
+            Instruction::From {
+                platform: None,
+                image: String::from("ubuntu:latest"),
+                alias: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_from_with_invalid_alias() {
+        let arguments = vec![String::from("ubuntu:latest"), String::from("AS")];
+        let result = parse(&arguments);
+
+        assert!(result.is_err());
+    }
+}

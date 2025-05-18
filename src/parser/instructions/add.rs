@@ -34,3 +34,33 @@ pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
         destination,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        let arguments = vec![
+            String::from("--checksum=sha256:abc123"),
+            String::from("--chown=root"),
+            String::from("--chmod=755"),
+            String::from("--link=false"),
+            String::from("file.txt"),
+            String::from("/tmp/file.txt"),
+        ];
+        let result = parse(&arguments).unwrap();
+
+        assert_eq!(
+            result,
+            Instruction::Add {
+                checksum: Some(String::from("sha256:abc123")),
+                chown: Some(String::from("root")),
+                chmod: Some(String::from("755")),
+                link: Some(String::from("false")),
+                sources: vec![String::from("file.txt")],
+                destination: String::from("/tmp/file.txt"),
+            }
+        )
+    }
+}
