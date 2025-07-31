@@ -1,6 +1,3 @@
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -14,14 +11,15 @@ use crate::symbols::strings::HEREDOC_END;
 use crate::symbols::strings::HEREDOC_NEWLINE;
 use crate::symbols::strings::HEREDOC_START;
 
-pub fn read_lines(file: &File) -> Vec<String> {
-    let reader = BufReader::new(file);
-
-    let mut lines = Vec::new();
+pub fn process_dockerfile_content<I>(lines_iter: I) -> Vec<String>
+where
+    I: Iterator<Item = String>,
+{
+    let mut result = Vec::new();
     let mut current = String::new();
     let mut in_heredoc = false;
 
-    for line in reader.lines().map_while(Result::ok) {
+    for line in lines_iter {
         let trimmed = line.trim_end();
 
         // skip inline comments
@@ -39,7 +37,7 @@ pub fn read_lines(file: &File) -> Vec<String> {
         if in_heredoc {
             current.push_str(trimmed);
             if trimmed == HEREDOC_END {
-                lines.push(current);
+                result.push(current);
                 current = String::new();
                 in_heredoc = false;
             } else {
@@ -55,11 +53,11 @@ pub fn read_lines(file: &File) -> Vec<String> {
             }
         } else {
             current.push_str(trimmed);
-            lines.push(current);
+            result.push(current);
             current = String::new();
         }
     }
-    lines
+    result
 }
 
 pub fn split_heredoc(strings: Vec<String>) -> Vec<Vec<String>> {

@@ -1,6 +1,9 @@
 use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::io::Write;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 use crate::ParseResult;
 use crate::ast::Instruction;
@@ -21,13 +24,24 @@ use crate::parser::instructions::user;
 use crate::parser::instructions::volume;
 use crate::parser::instructions::workdir;
 use crate::symbols::chars::HASHTAG;
-use crate::utils::read_lines;
+use crate::utils::process_dockerfile_content;
 use crate::utils::split_instruction_and_arguments;
 
 /// This struct represents a Dockerfile instance.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dockerfile {
     pub instructions: Vec<Instruction>,
+}
+
+impl FromStr for Dockerfile {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lines = process_dockerfile_content(s.lines().map(String::from));
+
+        let instructions = parse(lines)?;
+        Ok(Self::new(instructions))
+    }
 }
 
 impl Dockerfile {
@@ -47,7 +61,7 @@ impl Dockerfile {
     ///
     /// The file is read line by line, preserving empty lines and comments.
     ///
-    /// # Example
+    /// ## Example
     ///
     /// ```no_run
     /// use std::path::PathBuf;
@@ -56,17 +70,23 @@ impl Dockerfile {
     /// use dockerfile_parser_rs::ParseResult;
     ///
     /// fn main() -> ParseResult<()> {
-    ///     let dockerfile = Dockerfile::from(PathBuf::from("./Dockerfile"))?;
+    ///     let path = PathBuf::from("./Dockerfile");
+    ///
+    ///     let dockerfile = Dockerfile::from(path)?;
     ///     println!("{:#?}", dockerfile);
     ///     Ok(())
     /// }
     /// ```
     ///
-    /// # Errors
+    /// ## Errors
     ///
     /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
-        let instructions = parse(path)?;
+        let file = File::open(path).map_err(|e| ParseError::FileError(e.to_string()))?;
+        let reader = BufReader::new(file);
+        let lines = process_dockerfile_content(reader.lines().map_while(Result::ok));
+
+        let instructions = parse(lines)?;
         Ok(Self::new(instructions))
     }
 
@@ -75,7 +95,7 @@ impl Dockerfile {
     /// If the file does not exist, it will be created.
     /// If the file exists, it will be overwritten.
     ///
-    /// # Errors
+    /// ## Errors
     ///
     /// Returns an error if the file cannot be created or written to.
     pub fn dump(&self, path: PathBuf) -> ParseResult<()> {
@@ -119,10 +139,7 @@ impl Dockerfile {
     }
 }
 
-fn parse(path: PathBuf) -> ParseResult<Vec<Instruction>> {
-    let file = File::open(path).map_err(|e| ParseError::FileError(e.to_string()))?;
-    let lines = read_lines(&file);
-
+fn parse(lines: Vec<String>) -> ParseResult<Vec<Instruction>> {
     let mut instructions = Vec::new();
 
     for line in lines {
@@ -193,6 +210,21 @@ mod tests {
         ];
 
         Dockerfile::new(instructions)
+    }
+
+    #[test]
+    fn test_dockerfile_from_str() {
+        let mut content = String::new();
+        content.push_str("FROM docker.io/library/fedora:latest\n");
+        content.push_str("RUN cat /etc/os-release\n");
+        content.push_str("FROM docker.io/library/ubuntu:latest\n");
+        content.push_str("COPY file.txt /tmp/file.txt\n");
+        content.push_str("ENTRYPOINT [\"/bin/bash\"]\n");
+
+        let dockerfile = Dockerfile::from_str(&content).unwrap();
+        assert_eq!(dockerfile.steps(), 5);
+        assert_eq!(dockerfile.layers(), 2);
+        assert_eq!(dockerfile.stages(), 2);
     }
 
     #[test]

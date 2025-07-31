@@ -36,10 +36,12 @@ cargo add dockerfile-parser-rs
 
 ## Example
 
-Check out the [src/bin/example.rs](src/bin/example.rs) file and run the following command to see how
+Check out the [src/bin/example.rs](src/bin/example.rs) file or run the following commands to see how
 to use the library.
 
 ```shell
+git clone https://github.com/slimreaper35/dockerfile-parser-rs.git
+cd dockerfile-parser-rs
 cargo run example
 ```
 
