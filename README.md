@@ -31,29 +31,16 @@ comments are supported too.
 
 Run the following Cargo command in your project directory:
 
-```bash
+```shell
 cargo add dockerfile-parser-rs
 ```
 
 ## Example
 
-```rust
-use std::path::PathBuf;
+Check out the [src/bin/example.rs](src/bin/example.rs) file and run the following command:
 
-use dockerfile_parser_rs::Dockerfile;
-use dockerfile_parser_rs::Instruction;
-
-fn main() {
-    let path = PathBuf::from("Dockerfile");
-    let mut dockerfile = Dockerfile::from(path).unwrap();
-
-    dockerfile.instructions.push(Instruction::User {
-        user: String::from("1001"),
-        group: None,
-    });
-
-    dockerfile.dump().unwrap();
-}
+```shell
+cargo run example
 ```
 
 ## Limitations
@@ -63,7 +50,7 @@ fn main() {
 ### Instruction case sensitivity
 
 The instructions are not case-sensitive. However, the library works only with uppercase instructions
-for simplicity and consistency. Using uppercase instructions is also recommended convention in
+for simplicity and consistency. Using uppercase instructions is also a recommended convention in
 [Dockerfile](https://docs.docker.com/reference/dockerfile/#format) format documentation.
 
 ### Instruction arguments ordering
@@ -75,8 +62,8 @@ instructions when they have multiple key-value pairs defined on one line.
 ### Here-documents (heredocs)
 
 Here-documents allow redirection of subsequent Dockerfile lines to the input of `RUN` or `COPY`
-commands. If such command contains a here-document the Dockerfile considers the next lines until the
-line only containing a here-doc delimiter as part of the same command.
+commands. If such a command contains a here-document, the Dockerfile considers the next lines until
+the line only containing a here-doc delimiter as part of the same command.
 
 The here-documents syntax is only supported for the `RUN` instruction and only with the `EOF`
 delimiter. Make sure that here-documents are always terminated with an `EOF` character on a new
