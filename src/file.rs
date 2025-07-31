@@ -1,5 +1,4 @@
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -28,25 +27,20 @@ use crate::utils::split_instruction_and_arguments;
 /// This struct represents a Dockerfile instance.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dockerfile {
-    pub path: PathBuf,
     pub instructions: Vec<Instruction>,
 }
 
 impl Dockerfile {
-    /// Creates a new `Dockerfile` instance for the given path and instructions.
-    ///
-    /// The actual file does not need to exist at this point.
+    /// Creates a new `Dockerfile` instance for the given instructions.
     #[must_use]
-    pub const fn new(path: PathBuf, instructions: Vec<Instruction>) -> Self {
-        Self { path, instructions }
+    pub const fn new(instructions: Vec<Instruction>) -> Self {
+        Self { instructions }
     }
 
-    /// Creates an empty `Dockerfile` instance for the given path.
-    ///
-    /// The actual file does not need to exist at this point.
+    /// Creates an empty `Dockerfile` instance.
     #[must_use]
-    pub const fn empty(path: PathBuf) -> Self {
-        Self::new(path, Vec::new())
+    pub const fn empty() -> Self {
+        Self::new(Vec::new())
     }
 
     /// Parses the content of the Dockerfile and returns a populated `Dockerfile` instance.
@@ -72,8 +66,8 @@ impl Dockerfile {
     ///
     /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
-        let instructions = parse(path.clone())?;
-        Ok(Self::new(path, instructions))
+        let instructions = parse(path)?;
+        Ok(Self::new(instructions))
     }
 
     /// Dumps the current instructions into the Dockerfile.
@@ -84,10 +78,10 @@ impl Dockerfile {
     /// # Errors
     ///
     /// Returns an error if the file cannot be created or written to.
-    pub fn dump(&self) -> io::Result<()> {
-        let mut file = File::create(&self.path)?;
+    pub fn dump(&self, path: PathBuf) -> ParseResult<()> {
+        let mut file = File::create(path).map_err(|e| ParseError::FileError(e.to_string()))?;
         for instruction in &self.instructions {
-            writeln!(file, "{instruction}")?;
+            writeln!(file, "{instruction}").map_err(|e| ParseError::FileError(e.to_string()))?;
         }
         Ok(())
     }
@@ -169,7 +163,6 @@ mod tests {
     use super::*;
 
     fn mock_dummy_dockerfile() -> Dockerfile {
-        let path = PathBuf::from("./Dockerfile");
         let instructions = vec![
             Instruction::From {
                 platform: None,
@@ -198,7 +191,8 @@ mod tests {
             },
             Instruction::Entrypoint(vec![String::from("/bin/bash")]),
         ];
-        Dockerfile::new(path, instructions)
+
+        Dockerfile::new(instructions)
     }
 
     #[test]

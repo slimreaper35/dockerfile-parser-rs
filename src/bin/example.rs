@@ -2,10 +2,11 @@ use std::path::PathBuf;
 
 use dockerfile_parser_rs::Dockerfile;
 use dockerfile_parser_rs::Instruction;
+use dockerfile_parser_rs::ParseResult;
 
-fn main() {
+fn main() -> ParseResult<()> {
     let path = PathBuf::from("src/bin/Dockerfile");
-    let mut dockerfile = Dockerfile::from(path).unwrap();
+    let mut dockerfile = Dockerfile::from(path.clone())?;
 
     dockerfile.instructions.push(Instruction::Empty);
     dockerfile.instructions.push(Instruction::User {
@@ -13,6 +14,7 @@ fn main() {
         group: None,
     });
 
-    dockerfile.dump().unwrap();
+    dockerfile.dump(path)?;
     println!("{dockerfile:#?}");
+    Ok(())
 }

@@ -12,12 +12,10 @@ fn test_parse() {
 #[test]
 fn test_parse_and_dump() {
     let path = std::path::PathBuf::from("tests/data/Dockerfile.complex");
-    let mut dockerfile = Dockerfile::from(path.clone()).unwrap();
+    let dockerfile = Dockerfile::from(path.clone()).unwrap();
 
     let temp_file = std::env::temp_dir().join("Dockerfile.complex");
-
-    dockerfile.path = temp_file.clone();
-    dockerfile.dump().unwrap();
+    dockerfile.dump(temp_file.clone()).unwrap();
 
     let original_content = std::fs::read_to_string(path).unwrap();
     let dumped_content = std::fs::read_to_string(temp_file).unwrap();
