@@ -1,0 +1,74 @@
+name: Issue
+description: Create a new issue from template
+assignees: slimreaper35
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: What type of issue are you opening?
+      options:
+        - Bug
+        - Feature
+        - Task
+        - Question
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe your issue in detail.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: Please provide a simple example of how it would work or how you would use it.
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: If this is a bug report, please provide steps to reproduce the issue.
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen? What would you like to see?
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output or screenshots
+      description: Please copy and paste any relevant log output or add screenshots.
+      render: shell
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: What operating system are you using?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched [existing issues](https://github.com/slimreaper35/dockerfile-parser-rs/issues) and this is not a duplicate.
+          required: true
+        - label: I have provided enough information for the maintainers to understand and address my issue.
+          required: true
