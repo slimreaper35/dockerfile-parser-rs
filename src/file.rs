@@ -72,73 +72,8 @@ impl Dockerfile {
     ///
     /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
-        let mut dockerfile = Self::empty(path);
-        dockerfile.instructions = dockerfile.parse()?;
-        Ok(dockerfile)
-    }
-
-    /// Parses the content of the Dockerfile and returns a vector of `Instruction` items.
-    ///
-    /// The file is read line by line, preserving empty lines and comments.
-    ///
-    /// **The attributes of the `Dockerfile` instance are not modified by this method.**
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// use std::path::PathBuf;
-    ///
-    /// use dockerfile_parser_rs::Dockerfile;
-    /// use dockerfile_parser_rs::ParseResult;
-    ///
-    /// fn main() -> ParseResult<()> {
-    ///     let dockerfile = Dockerfile::empty(PathBuf::from("./Dockerfile"));
-    ///     let instructions = dockerfile.parse()?;
-    ///     println!("{:#?}", instructions);
-    ///     Ok(())
-    /// }
-    /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
-    pub fn parse(&self) -> ParseResult<Vec<Instruction>> {
-        let file = File::open(&self.path).map_err(|e| ParseError::FileError(e.to_string()))?;
-        let lines = read_lines(&file);
-
-        let mut instructions = Vec::new();
-
-        for line in lines {
-            // preserve empty lines
-            if line.is_empty() {
-                instructions.push(Instruction::Empty);
-            // preserve comments
-            } else if line.starts_with(HASHTAG) {
-                instructions.push(Instruction::Comment(line.clone()));
-            } else {
-                let (instruction, arguments) = split_instruction_and_arguments(&line)?;
-                let instruction = match instruction.as_str() {
-                    "ADD" => add::parse(&arguments),
-                    "ARG" => Ok(arg::parse(&arguments)),
-                    "CMD" => Ok(cmd::parse(&arguments)),
-                    "COPY" => copy::parse(&arguments),
-                    "ENTRYPOINT" => Ok(entrypoint::parse(&arguments)),
-                    "ENV" => Ok(env::parse(&arguments)),
-                    "EXPOSE" => Ok(expose::parse(arguments)),
-                    "LABEL" => Ok(label::parse(&arguments)),
-                    "FROM" => from::parse(&arguments),
-                    "RUN" => run::parse(&arguments),
-                    "SHELL" => shell::parse(&arguments),
-                    "STOPSIGNAL" => stopsignal::parse(&arguments),
-                    "USER" => user::parse(&arguments),
-                    "VOLUME" => Ok(volume::parse(&arguments)),
-                    "WORKDIR" => workdir::parse(&arguments),
-                    _ => return Err(ParseError::UnknownInstruction(instruction)),
-                }?;
-                instructions.push(instruction);
-            }
-        }
-        Ok(instructions)
+        let instructions = parse(path.clone())?;
+        Ok(Self::new(path, instructions))
     }
 
     /// Dumps the current instructions into the Dockerfile.
@@ -188,6 +123,45 @@ impl Dockerfile {
             .filter(|i| matches!(i, Instruction::From { .. }))
             .count()
     }
+}
+
+fn parse(path: PathBuf) -> ParseResult<Vec<Instruction>> {
+    let file = File::open(path).map_err(|e| ParseError::FileError(e.to_string()))?;
+    let lines = read_lines(&file);
+
+    let mut instructions = Vec::new();
+
+    for line in lines {
+        // preserve empty lines
+        if line.is_empty() {
+            instructions.push(Instruction::Empty);
+        // preserve comments
+        } else if line.starts_with(HASHTAG) {
+            instructions.push(Instruction::Comment(line.clone()));
+        } else {
+            let (instruction, arguments) = split_instruction_and_arguments(&line)?;
+            let instruction = match instruction.as_str() {
+                "ADD" => add::parse(&arguments),
+                "ARG" => Ok(arg::parse(&arguments)),
+                "CMD" => Ok(cmd::parse(&arguments)),
+                "COPY" => copy::parse(&arguments),
+                "ENTRYPOINT" => Ok(entrypoint::parse(&arguments)),
+                "ENV" => Ok(env::parse(&arguments)),
+                "EXPOSE" => Ok(expose::parse(arguments)),
+                "LABEL" => Ok(label::parse(&arguments)),
+                "FROM" => from::parse(&arguments),
+                "RUN" => run::parse(&arguments),
+                "SHELL" => shell::parse(&arguments),
+                "STOPSIGNAL" => stopsignal::parse(&arguments),
+                "USER" => user::parse(&arguments),
+                "VOLUME" => Ok(volume::parse(&arguments)),
+                "WORKDIR" => workdir::parse(&arguments),
+                _ => return Err(ParseError::UnknownInstruction(instruction)),
+            }?;
+            instructions.push(instruction);
+        }
+    }
+    Ok(instructions)
 }
 
 #[cfg(test)]
