@@ -73,7 +73,7 @@ impl Dockerfile {
     ///     let path = PathBuf::from("./Dockerfile");
     ///
     ///     let dockerfile = Dockerfile::from(path)?;
-    ///     println!("{:#?}", dockerfile);
+    ///     dockerfile.print();
     ///     Ok(())
     /// }
     /// ```
@@ -90,7 +90,7 @@ impl Dockerfile {
         Ok(Self::new(instructions))
     }
 
-    /// Dumps the current instructions into the Dockerfile.
+    /// Dumps the instructions to a file.
     ///
     /// If the file does not exist, it will be created.
     /// If the file exists, it will be overwritten.
@@ -104,6 +104,11 @@ impl Dockerfile {
             writeln!(file, "{instruction}").map_err(|e| ParseError::FileError(e.to_string()))?;
         }
         Ok(())
+    }
+
+    /// Writes the instructions to the standard output.
+    pub fn print(&self) {
+        println!("{self:#?}");
     }
 
     /// Returns number of instructions in the Dockerfile.

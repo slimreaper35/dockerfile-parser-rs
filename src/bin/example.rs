@@ -15,6 +15,7 @@ fn main() -> ParseResult<()> {
     });
 
     dockerfile.dump(path)?;
-    println!("{dockerfile:#?}");
+    dockerfile.print();
+
     Ok(())
 }
