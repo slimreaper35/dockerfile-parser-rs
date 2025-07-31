@@ -2,8 +2,7 @@
 
 [![version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
 
-The ultimate Rust library for parsing, modifying, and generating Dockerfiles with
-**only one dependency**. It provides a simple and efficient way to work with Dockerfiles in Rust.
+The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 
 ## Instructions
 
@@ -37,15 +36,14 @@ cargo add dockerfile-parser-rs
 
 ## Example
 
-Check out the [src/bin/example.rs](src/bin/example.rs) file and run the following command:
+Check out the [src/bin/example.rs](src/bin/example.rs) file and run the following command to see how
+to use the library.
 
 ```shell
 cargo run example
 ```
 
 ## Limitations
-
-...or things to keep in mind when using this library.
 
 ### Instruction case sensitivity
 
@@ -68,17 +66,3 @@ the line only containing a here-doc delimiter as part of the same command.
 The here-documents syntax is only supported for the `RUN` instruction and only with the `EOF`
 delimiter. Make sure that here-documents are always terminated with an `EOF` character on a new
 line.
-
-### Shell and exec form
-
-The `RUN`, `CMD`, and `ENTRYPOINT` instructions all have two possible forms:
-
-- `INSTRUCTION ["executable", "param1", "param2"]` (exec form)
-- `INSTRUCTION command param1 param2` (shell form)
-
-The exec form makes it possible to avoid shell string munging and to invoke commands using a
-specific command shell, or any other executable. It uses a JSON array syntax, where each element in
-the array is a command, flag, or argument.
-
-The library parses both forms, but only the exec form is supported for writing instructions back
-into a Dockerfile.

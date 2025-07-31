@@ -2,6 +2,7 @@ pub mod chars {
     pub const BACKSLASH: char = '\\';
     pub const COLON: char = ':';
     pub const COMMA: char = ',';
+    pub const SINGLE_QUOTE: char = '\'';
     pub const DOUBLE_QUOTE: char = '"';
     pub const EQUALS: char = '=';
     pub const HASHTAG: char = '#';

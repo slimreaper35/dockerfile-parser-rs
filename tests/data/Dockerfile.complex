@@ -1,7 +1,3 @@
-#############
-## ChatGPT ##
-#############
-
 FROM --platform=linux/amd64 rust:1.70-slim-buster AS builder
 
 # Set up metadata
@@ -17,8 +13,8 @@ ENV PATH="${CARGO_HOME}/bin:${PATH}" RUST_BACKTRACE="full"
 SHELL ["bash", "-euxo", "pipefail", "-c"]
 
 # Install stable toolchain and cargo-chef for caching
-RUN ["rustup", "default", "stable"]
-RUN ["cargo", "install", "cargo-chef", "--locked"]
+RUN rustup default stable
+RUN cargo install cargo-chef --locked
 
 WORKDIR /app
 
@@ -28,16 +24,16 @@ COPY scripts/ /app/scripts/
 ADD https://raw.githubusercontent.com/rust-lang/rust/master/README.md /app/README.md
 
 # Make scripts executable
-RUN ["chmod", "+x", "/app/scripts/install-deps.sh"]
+RUN chmod +x /app/scripts/install-deps.sh
 
 # Cache dependency resolution
 COPY Cargo.toml Cargo.lock ./
-RUN ["cargo", "chef", "prepare", "--recipe-path", "recipe.json"]
+RUN cargo chef prepare --recipe-path recipe.json
 
 # Copy source and build
 COPY . ./
-RUN ["cargo", "chef", "cook", "--release", "--recipe-path", "recipe.json"]
-RUN ["cargo", "build", "--release", "--locked"]
+RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo build --release --locked
 
 FROM --platform=linux/amd64 debian:stable-slim
 
@@ -45,8 +41,8 @@ ARG APP_USER=appuser
 ARG APP_GROUP=appgroup
 
 # Create non-root user and group
-RUN ["groupadd", "-r", "--gid", "1000", "${APP_GROUP}"]
-RUN ["useradd", "-r", "--uid", "1000", "--gid", "${APP_GROUP}", "--home-dir", "/app", "--shell", "/sbin/nologin", "${APP_USER}"]
+RUN groupadd -r --gid 1000 ${APP_GROUP}
+RUN useradd -r --uid 1000 --gid ${APP_GROUP} --home-dir /app --shell /sbin/nologin ${APP_USER}
 
 WORKDIR /app
 

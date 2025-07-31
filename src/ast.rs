@@ -342,7 +342,7 @@ impl fmt::Display for Instruction {
                         command.join(" "),
                         heredoc.join("\n")
                     ),
-                    None => write!(f, "RUN {prefix}{command:?}"),
+                    None => write!(f, "RUN {prefix}{}", command.join(" ")),
                 }
             }
             Self::Shell(shell) => write!(f, "SHELL {shell:?}"),
@@ -521,7 +521,7 @@ mod tests {
             heredoc: None,
         };
 
-        let expected = "RUN [\"cat\", \"/etc/os-release\"]";
+        let expected = "RUN cat /etc/os-release";
         assert_eq!(instruction.to_string(), expected);
     }
 

@@ -1,11 +1,14 @@
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 
+use crate::quoter::Quoter;
 use crate::symbols::chars::COMMA;
 use crate::symbols::chars::DOUBLE_QUOTE;
 use crate::symbols::chars::EQUALS;
 use crate::symbols::chars::LEFT_BRACKET;
 use crate::symbols::chars::RIGHT_BRACKET;
+use crate::symbols::chars::SINGLE_QUOTE;
+use crate::symbols::chars::SPACE;
 use crate::symbols::strings::EMPTY;
 use crate::symbols::strings::HYPHEN_MINUS;
 
@@ -19,23 +22,33 @@ pub fn is_exec_form(arguments: &[String]) -> bool {
 pub fn clean_shell_form(arguments: &[String]) -> Vec<String> {
     arguments
         .iter()
-        .map(|arg| arg.replace(DOUBLE_QUOTE, EMPTY))
+        .map(Quoter::dequote)
         .filter(|arg| !arg.is_empty())
         .collect()
 }
 
 pub fn clean_exec_form(arguments: &[String]) -> Vec<String> {
-    arguments
-        .iter()
-        .map(|arg| {
-            arg.trim_start_matches(LEFT_BRACKET)
-                .trim_start_matches(COMMA)
-                .trim_end_matches(RIGHT_BRACKET)
-                .trim_end_matches(COMMA)
-                .replace(DOUBLE_QUOTE, EMPTY)
-        })
-        .filter(|arg| !arg.is_empty())
-        .collect()
+    let mut result = Vec::new();
+    let mut current = String::new();
+
+    for arg in arguments {
+        let trimmed = arg
+            .trim_start_matches(LEFT_BRACKET)
+            .trim_end_matches(RIGHT_BRACKET);
+
+        if !trimmed.starts_with(DOUBLE_QUOTE) && !trimmed.starts_with(SINGLE_QUOTE) {
+            current.push(SPACE);
+        }
+
+        current.push_str(trimmed);
+
+        if trimmed.ends_with(COMMA) {
+            result.push(current.dequote().trim_end_matches(COMMA).to_owned());
+            current.clear();
+        }
+    }
+    result.push(current.dequote());
+    result
 }
 
 pub fn get_options_from(arguments: &[String]) -> (HashMap<String, String>, Vec<String>) {
@@ -188,9 +201,7 @@ mod tests {
             cleaned,
             vec![
                 String::from("/usr/bin/executable"),
-                String::from("arg1"),
-                String::from("with"),
-                String::from("spaces"),
+                String::from("arg1 with spaces"),
                 String::from("arg2"),
             ]
         );

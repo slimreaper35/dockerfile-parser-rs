@@ -1,4 +1,5 @@
 use crate::symbols::chars::DOUBLE_QUOTE;
+use crate::symbols::strings::EMPTY;
 
 pub trait Quoter {
     fn dequote(&self) -> String;
@@ -7,9 +8,7 @@ pub trait Quoter {
 
 impl Quoter for String {
     fn dequote(&self) -> String {
-        self.trim_start_matches(DOUBLE_QUOTE)
-            .trim_end_matches(DOUBLE_QUOTE)
-            .to_owned()
+        self.replace(DOUBLE_QUOTE, EMPTY)
     }
 
     fn enquote(&self) -> String {
