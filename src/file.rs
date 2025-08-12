@@ -5,6 +5,9 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use serde::Deserialize;
+use serde::Serialize;
+
 use crate::ParseResult;
 use crate::ast::Instruction;
 use crate::error::ParseError;
@@ -28,7 +31,7 @@ use crate::utils::process_dockerfile_content;
 use crate::utils::split_instruction_and_arguments;
 
 /// This struct represents a Dockerfile instance.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Dockerfile {
     pub instructions: Vec<Instruction>,
 }
@@ -73,7 +76,7 @@ impl Dockerfile {
     ///     let path = PathBuf::from("./Dockerfile");
     ///
     ///     let dockerfile = Dockerfile::from(path)?;
-    ///     dockerfile.print();
+    ///     dockerfile.to_json();
     ///     Ok(())
     /// }
     /// ```
@@ -106,9 +109,16 @@ impl Dockerfile {
         Ok(())
     }
 
-    /// Writes the instructions to the standard output.
-    pub fn print(&self) {
-        println!("{self:#?}");
+    /// Writes the Dockerfile to the standard output in JSON format.
+    ///
+    /// ## Errors
+    ///
+    /// Returns an error if the Dockerfile cannot be serialized to JSON.
+    pub fn to_json(&self) -> ParseResult<()> {
+        let json =
+            serde_json::to_string_pretty(self).map_err(|e| ParseError::FileError(e.to_string()))?;
+        println!("{json}");
+        Ok(())
     }
 
     /// Returns number of instructions in the Dockerfile.
@@ -116,7 +126,7 @@ impl Dockerfile {
     pub fn steps(&self) -> usize {
         self.instructions
             .iter()
-            .filter(|i| !matches!(i, Instruction::Empty | Instruction::Comment { .. }))
+            .filter(|i| !matches!(i, Instruction::Empty {} | Instruction::Comment { .. }))
             .count()
     }
 
@@ -150,7 +160,7 @@ fn parse(lines: Vec<String>) -> ParseResult<Vec<Instruction>> {
     for line in lines {
         // preserve empty lines
         if line.is_empty() {
-            instructions.push(Instruction::Empty);
+            instructions.push(Instruction::Empty {});
         // preserve comments
         } else if line.starts_with(HASHTAG) {
             instructions.push(Instruction::Comment(line.clone()));

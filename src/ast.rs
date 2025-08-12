@@ -3,7 +3,10 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+use serde::Deserialize;
+use serde::Serialize;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 /// This enum represents available instructions in a Dockerfile and their associated data.
 pub enum Instruction {
     /// Represents an ADD instruction in the Dockerfile.
@@ -99,9 +102,9 @@ pub enum Instruction {
     /// ```
     /// use dockerfile_parser_rs::Instruction;
     ///
-    /// let empty = Instruction::Empty;
+    /// let empty = Instruction::Empty {};
     /// ```
-    Empty,
+    Empty {},
     /// Represents an ENTRYPOINT instruction in the Dockerfile.
     ///
     /// ### Example
@@ -299,7 +302,7 @@ impl fmt::Display for Instruction {
                 let prefix = helpers::format_options_string(&options);
                 write!(f, "COPY {prefix}{} {destination}", sources.join(" "))
             }
-            Self::Empty => write!(f, ""),
+            Self::Empty {} => write!(f, ""),
             Self::Entrypoint(entrypoint) => write!(f, "ENTRYPOINT {entrypoint:?}"),
             Self::Env(env) => write!(f, "ENV {}", helpers::format_btree_map(env)),
             Self::Expose { ports } => write!(f, "EXPOSE {}", ports.join(" ")),
@@ -613,7 +616,7 @@ mod tests {
 
     #[test]
     fn test_display_instruction_empty() {
-        let instruction = Instruction::Empty;
+        let instruction = Instruction::Empty {};
 
         let expected = "";
         assert_eq!(instruction.to_string(), expected);

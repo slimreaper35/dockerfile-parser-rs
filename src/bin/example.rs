@@ -8,14 +8,12 @@ fn main() -> ParseResult<()> {
     let path = PathBuf::from("src/bin/Dockerfile");
     let mut dockerfile = Dockerfile::from(path.clone())?;
 
-    dockerfile.instructions.push(Instruction::Empty);
     dockerfile.instructions.push(Instruction::User {
         user: String::from("1001"),
         group: None,
     });
 
     dockerfile.dump(path)?;
-    dockerfile.print();
 
     Ok(())
 }
