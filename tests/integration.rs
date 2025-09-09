@@ -5,13 +5,13 @@ use dockerfile_parser_rs::ParseError;
 
 #[test]
 fn test_parse() {
-    let path = std::path::PathBuf::from("tests/data/Dockerfile.example");
+    let path = std::path::PathBuf::from("tests/dockerfiles/simple/Dockerfile");
     Dockerfile::from(path).unwrap();
 }
 
 #[test]
 fn test_parse_and_dump() {
-    let path = std::path::PathBuf::from("tests/data/Dockerfile.complex");
+    let path = std::path::PathBuf::from("tests/dockerfiles/complex/Dockerfile");
     let dockerfile = Dockerfile::from(path.clone()).unwrap();
 
     let temp_file = std::env::temp_dir().join("Dockerfile.complex");
