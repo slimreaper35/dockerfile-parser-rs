@@ -1,7 +1,9 @@
 # dockerfile-parser-rs
 
-[![latest version](https://img.shields.io/crates/v/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
-[![total downloads](https://img.shields.io/crates/d/dockerfile-parser-rs)](https://crates.io/crates/dockerfile-parser-rs)
+[![latest version](https://img.shields.io/crates/v/dockerfile-parser-rs?color=orange)](https://crates.io/crates/dockerfile-parser-rs)
+[![total downloads](https://img.shields.io/crates/d/dockerfile-parser-rs?color=green)](https://crates.io/crates/dockerfile-parser-rs)
+[![license](https://img.shields.io/crates/l/dockerfile-parser-rs?color=yellow)](https://github.com/slimreaper35/dockerfile-parser-rs/blob/main/LICENSE)
+[![documentation](https://img.shields.io/docsrs/dockerfile-parser-rs?color=blue)](https://docs.rs/dockerfile-parser-rs/latest/dockerfile_parser_rs)
 
 The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 
@@ -27,7 +29,7 @@ The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 [Dockerfile instructions](https://docs.docker.com/reference/dockerfile/#overview), empty lines and
 comments are supported too.
 
-## Install
+## Library
 
 Run the following Cargo command in your project directory:
 
@@ -35,15 +37,12 @@ Run the following Cargo command in your project directory:
 cargo add dockerfile-parser-rs
 ```
 
-## Example
+## Binary
 
-Check out the [src/bin/example.rs](src/bin/example.rs) file or run the following commands to see how
-to use the library.
+Run the following Cargo command in your project directory:
 
 ```shell
-git clone https://github.com/slimreaper35/dockerfile-parser-rs.git
-cd dockerfile-parser-rs
-cargo run example
+cargo install dockerfile-parser-rs
 ```
 
 ## Limitations
