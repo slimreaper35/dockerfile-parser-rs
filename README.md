@@ -29,7 +29,9 @@ The ultimate Rust library for parsing, modifying, and generating Dockerfiles.
 [Dockerfile instructions](https://docs.docker.com/reference/dockerfile/#overview), empty lines and
 comments are supported too.
 
-## Library
+## Usage
+
+### Library
 
 Run the following Cargo command in your project directory:
 
@@ -37,12 +39,42 @@ Run the following Cargo command in your project directory:
 cargo add dockerfile-parser-rs
 ```
 
-## Binary
+Example:
+
+```rust
+use std::path::PathBuf;
+
+use dockerfile_parser_rs::Dockerfile;
+use dockerfile_parser_rs::Instruction;
+use dockerfile_parser_rs::ParseResult;
+
+fn main() -> ParseResult<()> {
+    let path = PathBuf::from("./Dockerfile");
+    let mut dockerfile = Dockerfile::from(path.clone())?;
+
+    dockerfile.instructions.push(Instruction::User {
+        user: String::from("1001"),
+        group: None,
+    });
+
+    dockerfile.dump(path)?;
+    Ok(())
+}
+```
+
+### Binary
 
 Run the following Cargo command in your project directory:
 
 ```shell
 cargo install dockerfile-parser-rs
+```
+
+Example:
+
+```shell
+# prints the Dockerfile as JSON
+dockerfile-parser-rs ./Dockerfile
 ```
 
 ## Limitations
