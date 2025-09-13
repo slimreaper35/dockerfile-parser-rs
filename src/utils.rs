@@ -20,7 +20,7 @@ where
     let mut in_heredoc = false;
 
     for line in lines_iter {
-        let trimmed = line.trim_end();
+        let trimmed = line.trim();
 
         // skip inline comments
         if trimmed.starts_with(HASHTAG) && !current.is_empty() {
