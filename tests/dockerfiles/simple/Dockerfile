@@ -1,9 +1,5 @@
-##################################################################################################################
-## https://github.com/ArjanCodes/examples/blob/main/2025/efficient-python-dockerfile/Dockerfile.09_mountsecrets ##
-##################################################################################################################
-
 ## ------------------------------- Builder Stage ------------------------------ ##
-FROM python:3.13-bookworm AS builder
+FROM docker.io/library/python:3.13-bookworm AS builder
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential && \
@@ -23,7 +19,7 @@ COPY ./pyproject.toml .
 RUN uv sync
 
 ## ------------------------------- Production Stage ------------------------------ ##
-FROM python:3.13-slim-bookworm AS production
+FROM docker.io/library/python:3.13-slim-bookworm AS production
 
 # The following secrets are available during build time
 RUN --mount=type=secret,id=DB_PASSWORD \
@@ -47,6 +43,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose the specified port for FastAPI
 EXPOSE $PORT
+
+# Run as non-root user
+USER 1001
 
 # Start the application with Uvicorn in production mode, using environment variable references
 CMD ["uvicorn", "src.main:app", "--log-level", "info", "--host", "0.0.0.0", "--port", "8080"]

@@ -16,45 +16,46 @@ where
     I: Iterator<Item = String>,
 {
     let mut result = Vec::new();
-    let mut current = String::new();
+
+    let mut current_line = String::new();
     let mut in_heredoc = false;
 
     for line in lines_iter {
-        let trimmed = line.trim();
+        let trimmed_line = line.trim();
 
         // skip inline comments
-        if trimmed.starts_with(HASHTAG) && !current.is_empty() {
+        if trimmed_line.starts_with(HASHTAG) && !current_line.is_empty() {
             continue;
         }
 
-        if trimmed.contains(HEREDOC_START) {
+        if trimmed_line.contains(HEREDOC_START) {
             in_heredoc = true;
-            current.push_str(trimmed);
-            add_heredoc_newline(&mut current);
+            current_line.push_str(trimmed_line);
+            add_heredoc_newline(&mut current_line);
+            continue;
+        }
+
+        if in_heredoc && trimmed_line == HEREDOC_END {
+            current_line.push_str(HEREDOC_END);
+            result.push(current_line);
+            current_line = String::new();
+            in_heredoc = false;
             continue;
         }
 
         if in_heredoc {
-            current.push_str(trimmed);
-            if trimmed == HEREDOC_END {
-                result.push(current);
-                current = String::new();
-                in_heredoc = false;
-            } else {
-                add_heredoc_newline(&mut current);
-            }
+            current_line.push_str(trimmed_line);
+            add_heredoc_newline(&mut current_line);
             continue;
         }
 
-        if trimmed.ends_with(BACKSLASH) {
-            current.push_str(&trimmed[..trimmed.len() - 1]);
-            if !current.ends_with(SPACE) {
-                current.push(SPACE);
-            }
+        if trimmed_line.ends_with(BACKSLASH) {
+            current_line.push_str(&trimmed_line[..trimmed_line.len() - 1]);
+            current_line.push(SPACE);
         } else {
-            current.push_str(trimmed);
-            result.push(current);
-            current = String::new();
+            current_line.push_str(trimmed_line);
+            result.push(current_line);
+            current_line = String::new();
         }
     }
     result

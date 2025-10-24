@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rust:1.70-slim-buster AS builder
+FROM --platform=linux/amd64 docker.io/library/rust:1.70-slim-buster AS builder
 
 # Set up metadata
 LABEL maintainer="John Doe" version="1.0"
@@ -18,6 +18,16 @@ RUN cargo install cargo-chef --locked
 
 WORKDIR /app
 
+RUN <<EOF
+cat > .cargo/config.toml <<CONFIG
+[alias]
+b = "build"
+c = "check"
+t = "test"
+r = "run"
+CONFIG
+EOF
+
 # Copy helper scripts
 COPY scripts/ /app/scripts/
 
@@ -35,14 +45,7 @@ COPY . ./
 RUN cargo chef cook --release --recipe-path recipe.json
 RUN cargo build --release --locked
 
-FROM --platform=linux/amd64 debian:stable-slim
-
-ARG APP_USER=appuser
-ARG APP_GROUP=appgroup
-
-# Create non-root user and group
-RUN groupadd -r --gid 1000 ${APP_GROUP}
-RUN useradd -r --uid 1000 --gid ${APP_GROUP} --home-dir /app --shell /sbin/nologin ${APP_USER}
+FROM --platform=linux/amd64 docker.io/library/debian:stable-slim
 
 WORKDIR /app
 
@@ -65,7 +68,7 @@ EXPOSE 8080/tcp 8080/udp
 STOPSIGNAL SIGINT
 
 # Run as non-root user
-USER ${APP_USER}
+USER 1001
 
 # Entrypoint and default command
 ENTRYPOINT ["./myapp"]
