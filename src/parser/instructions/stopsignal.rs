@@ -4,7 +4,7 @@ use crate::error::ParseError;
 
 pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     if arguments.len() != 1 {
-        return Err(ParseError::BadNumberOfArguments(String::from(
+        return Err(ParseError::WrongNumberOfArguments(String::from(
             "STOPSIGNAL requires exactly one argument",
         )));
     }

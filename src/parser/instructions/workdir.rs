@@ -5,7 +5,7 @@ use crate::quoter::Quoter;
 
 pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     if arguments.len() != 1 {
-        return Err(ParseError::BadNumberOfArguments(String::from(
+        return Err(ParseError::WrongNumberOfArguments(String::from(
             "WORKDIR requires exactly one argument",
         )));
     }

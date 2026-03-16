@@ -6,7 +6,7 @@ use crate::symbols::chars::COLON;
 
 pub fn parse(arguments: &[String]) -> ParseResult<Instruction> {
     if arguments.len() != 1 {
-        return Err(ParseError::BadNumberOfArguments(String::from(
+        return Err(ParseError::WrongNumberOfArguments(String::from(
             "USER requires exactly one argument",
         )));
     }
