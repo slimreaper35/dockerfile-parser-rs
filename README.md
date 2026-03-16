@@ -74,7 +74,7 @@ Example:
 
 ```shell
 # prints the Dockerfile as JSON
-dockerfile-parser-rs ./Dockerfile
+dockerfile-parser-rs --help
 ```
 
 ## Limitations

@@ -9,7 +9,7 @@ use serde::Serialize;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 /// This enum represents available instructions in a Dockerfile and their associated data.
 pub enum Instruction {
-    /// Represents an ADD instruction in the Dockerfile.
+    /// ADD Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -33,7 +33,7 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    /// Represents an ARG instruction in the Dockerfile.
+    /// ARG Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -48,7 +48,7 @@ pub enum Instruction {
     /// ]));
     /// ```
     Arg(BTreeMap<String, Option<String>>),
-    /// Represents a CMD instruction in the Dockerfile.
+    /// CMD Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -61,7 +61,7 @@ pub enum Instruction {
     /// ]));
     /// ```
     Cmd(Vec<String>),
-    /// Represents a comment in the Dockerfile.
+    /// A comment.
     ///
     /// ### Example
     ///
@@ -71,7 +71,7 @@ pub enum Instruction {
     /// let comment = Instruction::Comment(String::from("# This is a comment"));
     /// ```
     Comment(String),
-    /// Represents a COPY instruction in the Dockerfile.
+    /// COPY Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -95,7 +95,7 @@ pub enum Instruction {
         sources: Vec<String>,
         destination: String,
     },
-    /// Represents an empty line in the Dockerfile.
+    /// An empty line.
     ///
     /// ### Example
     ///
@@ -105,7 +105,7 @@ pub enum Instruction {
     /// let empty = Instruction::Empty {};
     /// ```
     Empty {},
-    /// Represents an ENTRYPOINT instruction in the Dockerfile.
+    /// ENTRYPOINT Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -115,7 +115,7 @@ pub enum Instruction {
     /// let entrypoint = Instruction::Entrypoint(Vec::from([String::from("entrypoint.sh")]));
     /// ```
     Entrypoint(Vec<String>),
-    /// Represents an ENV instruction in the Dockerfile.
+    /// ENV Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -130,7 +130,7 @@ pub enum Instruction {
     /// ]));
     /// ```
     Env(BTreeMap<String, String>),
-    /// Represents an EXPOSE instruction in the Dockerfile.
+    /// EXPOSE Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -142,7 +142,7 @@ pub enum Instruction {
     /// };
     /// ```
     Expose { ports: Vec<String> },
-    /// Represents a FROM instruction in the Dockerfile.
+    /// FROM Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -160,7 +160,7 @@ pub enum Instruction {
         image: String,
         alias: Option<String>,
     },
-    /// Represents a LABEL instruction in the Dockerfile.
+    /// LABEL Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -175,7 +175,7 @@ pub enum Instruction {
     /// ]));
     /// ```
     Label(BTreeMap<String, String>),
-    /// Represents a RUN instruction in the Dockerfile.
+    /// RUN Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -201,7 +201,7 @@ pub enum Instruction {
         command: Vec<String>,
         heredoc: Option<Vec<String>>,
     },
-    /// Represents a SHELL instruction in the Dockerfile.
+    /// SHELL Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -211,7 +211,7 @@ pub enum Instruction {
     /// let shell = Instruction::Shell(Vec::from([String::from("/bin/sh"), String::from("-c")]));
     /// ```
     Shell(Vec<String>),
-    /// Represents a STOPSIGNAL instruction in the Dockerfile.
+    /// STOPSIGNAL Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -223,7 +223,7 @@ pub enum Instruction {
     /// };
     /// ```
     Stopsignal { signal: String },
-    /// Represents a USER instruction in the Dockerfile.
+    /// USER Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -236,7 +236,7 @@ pub enum Instruction {
     /// };
     /// ```
     User { user: String, group: Option<String> },
-    /// Represents a VOLUME instruction in the Dockerfile.
+    /// VOLUME Dockerfile instruction.
     ///
     /// ### Example
     ///
@@ -248,7 +248,7 @@ pub enum Instruction {
     /// };
     /// ```
     Volume { mounts: Vec<String> },
-    /// Represents a WORKDIR instruction in the Dockerfile.
+    /// WORKDIR Dockerfile instruction.
     ///
     /// ### Example
     ///

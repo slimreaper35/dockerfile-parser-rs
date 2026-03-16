@@ -6,7 +6,7 @@ use dockerfile_parser_rs::Dockerfile;
 use dockerfile_parser_rs::ParseError;
 use dockerfile_parser_rs::ParseResult;
 
-/// A parser that prints Dockerfiles as JSON
+/// Transform a Dockerfile into JSON format.
 #[derive(Parser)]
 #[command(version)]
 struct Args {

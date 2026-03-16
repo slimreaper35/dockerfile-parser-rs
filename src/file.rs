@@ -48,19 +48,19 @@ impl FromStr for Dockerfile {
 }
 
 impl Dockerfile {
-    /// Creates a new `Dockerfile` instance for the given instructions.
+    /// Create a new `Dockerfile` instance for the given instructions.
     #[must_use]
     pub const fn new(instructions: Vec<Instruction>) -> Self {
         Self { instructions }
     }
 
-    /// Creates an empty `Dockerfile` instance.
+    /// Create an empty `Dockerfile` instance.
     #[must_use]
     pub const fn empty() -> Self {
         Self::new(Vec::new())
     }
 
-    /// Parses the content of the Dockerfile and returns a populated `Dockerfile` instance.
+    /// Parse the content of the Dockerfile and return a populated `Dockerfile` instance.
     ///
     /// The file is read line by line, preserving empty lines and comments.
     ///
@@ -85,7 +85,7 @@ impl Dockerfile {
     ///
     /// ## Errors
     ///
-    /// Returns an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
+    /// Return an error if the file cannot be opened or if there is a syntax error in the Dockerfile.
     pub fn from(path: PathBuf) -> ParseResult<Self> {
         let file = File::open(path).map_err(|e| ParseError::FileError(e.to_string()))?;
         let reader = BufReader::new(file);
@@ -95,14 +95,14 @@ impl Dockerfile {
         Ok(Self::new(instructions))
     }
 
-    /// Dumps the instructions to a file.
+    /// Dump the instructions to a file.
     ///
     /// If the file does not exist, it will be created.
     /// If the file exists, it will be overwritten.
     ///
     /// ## Errors
     ///
-    /// Returns an error if the file cannot be created or written to.
+    /// Return an error if the file cannot be created or written to.
     pub fn dump(&self, path: PathBuf) -> ParseResult<()> {
         let mut file = File::create(path).map_err(|e| ParseError::FileError(e.to_string()))?;
         for instruction in &self.instructions {
@@ -111,18 +111,18 @@ impl Dockerfile {
         Ok(())
     }
 
-    /// Serializes the Dockerfile in JSON format.
+    /// Serialize the Dockerfile in JSON format.
     ///
     /// ## Errors
     ///
-    /// Returns an error if the Dockerfile cannot be serialized to JSON.
+    /// Return an error if the Dockerfile cannot be serialized to JSON.
     pub fn to_json(&self) -> ParseResult<String> {
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| ParseError::InternalError(e.to_string()))?;
         Ok(json)
     }
 
-    /// Returns number of instructions in the Dockerfile.
+    /// Return the number of instructions in the Dockerfile.
     #[must_use]
     pub fn steps(&self) -> usize {
         self.instructions
@@ -131,7 +131,7 @@ impl Dockerfile {
             .count()
     }
 
-    /// Returns number of layers in the Dockerfile.
+    /// Return the number of layers in the Dockerfile.
     #[must_use]
     pub fn layers(&self) -> usize {
         self.instructions
@@ -145,7 +145,7 @@ impl Dockerfile {
             .count()
     }
 
-    /// Returns number of stages in the Dockerfile.
+    /// Return the number of stages in the Dockerfile.
     #[must_use]
     pub fn stages(&self) -> usize {
         self.instructions
