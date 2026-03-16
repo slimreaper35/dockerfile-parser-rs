@@ -76,7 +76,9 @@ impl Dockerfile {
     ///     let path = PathBuf::from("./Dockerfile");
     ///
     ///     let dockerfile = Dockerfile::from(path)?;
-    ///     dockerfile.to_json();
+    ///     let dockerfile_json = dockerfile.to_json()?;
+    ///
+    ///     println!("{dockerfile_json}");
     ///     Ok(())
     /// }
     /// ```
@@ -109,16 +111,15 @@ impl Dockerfile {
         Ok(())
     }
 
-    /// Writes the Dockerfile to the standard output in JSON format.
+    /// Serializes the Dockerfile in JSON format.
     ///
     /// ## Errors
     ///
     /// Returns an error if the Dockerfile cannot be serialized to JSON.
-    pub fn to_json(&self) -> ParseResult<()> {
-        let json =
-            serde_json::to_string_pretty(self).map_err(|e| ParseError::FileError(e.to_string()))?;
-        println!("{json}");
-        Ok(())
+    pub fn to_json(&self) -> ParseResult<String> {
+        let json = serde_json::to_string_pretty(self)
+            .map_err(|e| ParseError::InternalError(e.to_string()))?;
+        Ok(json)
     }
 
     /// Returns number of instructions in the Dockerfile.
