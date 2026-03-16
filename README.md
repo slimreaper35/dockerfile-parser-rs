@@ -33,7 +33,7 @@ comments are supported too.
 
 ### Library
 
-Run the following Cargo command in your project directory:
+Run the following command in your project directory:
 
 ```shell
 cargo add dockerfile-parser-rs
@@ -64,16 +64,10 @@ fn main() -> ParseResult<()> {
 
 ### Binary
 
-Run the following Cargo command in your project directory:
+Run the following commands:
 
 ```shell
 cargo install dockerfile-parser-rs
-```
-
-Example:
-
-```shell
-# prints the Dockerfile as JSON
 dockerfile-parser-rs --help
 ```
 
