@@ -2,7 +2,6 @@
 [package]
 name = "dockerfile-parser-rs"
 version = "3.3.0"
-authors = ["Michal Šoltis <msoltis1@icloud.com>"]
 edition = "2024"
 description = "The ultimate Rust library for parsing, modifying, and generating Dockerfiles"
 documentation = "https://docs.rs/dockerfile-parser-rs/latest/dockerfile_parser_rs"
