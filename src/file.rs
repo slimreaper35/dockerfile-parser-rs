@@ -49,13 +49,11 @@ impl FromStr for Dockerfile {
 
 impl Dockerfile {
     /// Create a new `Dockerfile` instance for the given instructions.
-    #[must_use]
     pub const fn new(instructions: Vec<Instruction>) -> Self {
         Self { instructions }
     }
 
     /// Create an empty `Dockerfile` instance.
-    #[must_use]
     pub const fn empty() -> Self {
         Self::new(Vec::new())
     }
@@ -123,7 +121,6 @@ impl Dockerfile {
     }
 
     /// Return the number of instructions in the Dockerfile.
-    #[must_use]
     pub fn steps(&self) -> usize {
         self.instructions
             .iter()
@@ -132,7 +129,6 @@ impl Dockerfile {
     }
 
     /// Return the number of layers in the Dockerfile.
-    #[must_use]
     pub fn layers(&self) -> usize {
         self.instructions
             .iter()
@@ -146,7 +142,6 @@ impl Dockerfile {
     }
 
     /// Return the number of stages in the Dockerfile.
-    #[must_use]
     pub fn stages(&self) -> usize {
         self.instructions
             .iter()
