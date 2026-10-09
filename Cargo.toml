@@ -11,6 +11,10 @@ license = "MIT"
 keywords = ["containers", "docker", "dockerfile", "library", "parser"]
 categories = ["filesystem", "parsing", "virtualization"]
 
+[[bin]]
+name = "dfp"
+path = "src/main.rs"
+
 [dependencies]
 clap = { version = "4.5.47", features = ["derive"] }
 regex = "1.11.1"

@@ -68,7 +68,7 @@ Run the following commands:
 
 ```shell
 cargo install dockerfile-parser-rs
-dockerfile-parser-rs --help
+dfp --help
 ```
 
 ## Limitations
